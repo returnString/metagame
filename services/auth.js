@@ -4,11 +4,6 @@ const Service = require('../core/service');
 
 class AuthService extends Service
 {
-	constructor(options)
-	{
-		super(options)
-	}
-	
 	getRoutes()
 	{
 		return [

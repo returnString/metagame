@@ -4,11 +4,6 @@ const Service = require('../core/service');
 
 class SystemService extends Service
 {
-	constructor(options)
-	{
-		super(options)
-	}
-	
 	getRoutes()
 	{
 		return [
