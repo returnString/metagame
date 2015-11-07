@@ -5,6 +5,7 @@ const boot = require('../boot')
 const config = require('../config')
 const async = require('async')
 const uuid = require('node-uuid')
+const assert = require('assert')
 
 function createSocket()
 {
@@ -17,6 +18,16 @@ exports.boot = function(cb)
 	config.clustering.enabled = false
 	config.logging.verbosity = 100
 	boot(cb)
+}
+
+exports.assertError = function(error)
+{
+	return res =>
+	{
+		assert.equal(res.error, true)
+		assert.equal(res.code, error.code)
+		assert.equal(res.name, error.name)
+	}
 }
 
 exports.sequence = function(sequence, cb)
