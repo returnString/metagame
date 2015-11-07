@@ -1,3 +1,5 @@
+'use strict'
+
 const errorCodes = {
 	routeNotFound: 1,
 	authenticationRequired: 2,
