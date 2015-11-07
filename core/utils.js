@@ -1,3 +1,5 @@
+'use strict'
+
 const cluster = require('cluster')
 
 exports.getWorkerID = function()
