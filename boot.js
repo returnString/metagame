@@ -65,6 +65,23 @@ module.exports = function(cb)
 				port: config.websocket.port
 			})
 			
+			function respond(socket, data)
+			{
+				let response
+				if (data instanceof errcode.MetagameError)
+				{
+					response = data
+					response.error = true
+				}
+				else
+				{
+					response = { data }
+				}
+				
+				response.workerID = workerID
+				socket.send(JSON.stringify(response))
+			}
+			
 			server.on('connection', socket =>
 			{
 				socket.on('message', message =>
@@ -76,14 +93,14 @@ module.exports = function(cb)
 					}
 					catch (err)
 					{
-						socket.send({ error: errcode.messageParsingFailed })
+						respond(socket, errcode.authenticationRequired())
+						return
 					}
 					
 					co(function*()
 					{
 						const data = yield router.dispatch(requestData.path, socket, requestData.params)
-						const response = { data, workerID }
-						socket.send(JSON.stringify(response))
+						respond(socket, data)
 					}).catch(err =>
 					{
 						bootLog.error(err)

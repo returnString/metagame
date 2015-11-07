@@ -40,7 +40,7 @@ class Router
 		const route = this.routes.get(path)
 		if (!route)
 		{
-			return { error: errcode.routeNotFound }
+			return errcode.routeNotFound(path)
 		}
 		
 		let request = { params, socket }
@@ -50,7 +50,7 @@ class Router
 			request.user = this.usersBySocket.get(socket)
 			if (!request.user)
 			{
-				return { error: errcode.authenticationRequired }
+				return errcode.authenticationRequired()
 			}
 		}
 		

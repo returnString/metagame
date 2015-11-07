@@ -1,6 +1,7 @@
 'use strict'
 
 module.exports = {
+	debug: false,
 	platform: 'debug',
 	websocket: {
 		port: 1337,
