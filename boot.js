@@ -28,9 +28,24 @@ async.series([cb =>
 			const ServiceClass = require(servicesDir + serviceName)
 			
 			const serviceLogger = bunyan.createLogger({ name: serviceName })
-			const service = new ServiceClass({ log: serviceLogger, platform })
-			service.register(router)
+			const service = new ServiceClass({
+				log: serviceLogger,
+				platform,
+				router,
+			})
+			
+			const routes = service.getRoutes()
+			for (const route of routes)
+			{
+				const path = route[0]
+				const handler = route[1].bind(service)
+				const options = route[2]
+				router.addRoute(path, handler, options)
+			}
 		}
+		log.info({
+			routes: Array.from(router.routes.keys()),
+		}, 'registered routes')
 		
 		cb()
 	})

@@ -6,6 +6,7 @@ class Service
 	{
 		this.log = options.log
 		this.platform = options.platform
+		this.router = options.router
 	}
 }
 

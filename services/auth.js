@@ -9,10 +9,11 @@ class AuthService extends Service
 		super(options)
 	}
 	
-	register(router)
+	getRoutes()
 	{
-		this.router = router
-		router.addRoute('/auth', this.authenticate.bind(this))
+		return [
+			[ '/auth', this.authenticate ]
+		]
 	}
 	
 	*authenticate(req)

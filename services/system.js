@@ -9,9 +9,11 @@ class SystemService extends Service
 		super(options)
 	}
 	
-	register(router)
+	getRoutes()
 	{
-		router.addRoute('/system/time', this.getTime.bind(this))
+		return [
+			[ '/system/time', this.getTime, { loggedIn: true } ]
+		]
 	}
 	
 	*getTime(params)
