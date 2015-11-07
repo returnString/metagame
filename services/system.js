@@ -1,19 +1,23 @@
 'use strict'
 
 const Service = require('../core/service');
+const config = require('../config')
 
 class SystemService extends Service
 {
 	getRoutes()
 	{
 		return [
-			[ '/system/time', this.getTime, { authenticated: true } ]
+			[ '/system/info', this.getInfo, { authenticated: true } ]
 		]
 	}
 	
-	*getTime(params)
+	*getInfo(params)
 	{
-		return { time: new Date().toISOString() }
+		return {
+			time: new Date().toISOString(),
+			version: config.version,
+		}
 	}
 }
 

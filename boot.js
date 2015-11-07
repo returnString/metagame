@@ -13,6 +13,7 @@ const cluster = require('cluster')
 const os = require('os')
 const log = require('./core/log')
 const utils = require('./core/utils')
+const exec = require('child_process').exec
 
 module.exports = function(cb)
 {
@@ -24,6 +25,18 @@ module.exports = function(cb)
 	function initWorker()
 	{
 		async.series([cb =>
+		{
+			exec('git describe --always', (err, stdout, stderr) =>
+			{
+				if (!err && stdout)
+				{
+					config.version = stdout
+					bootLog.info({ version: stdout }, 'retrieved git version')
+				}
+				
+				cb()
+			})
+		}, cb =>
 		{
 			bootLog.info('initialising services')
 			
