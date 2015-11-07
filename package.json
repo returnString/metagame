@@ -1,0 +1,18 @@
+{
+  "name": "metagame",
+  "version": "1.0.0",
+  "description": "",
+  "main": "boot.js",
+  "dependencies": {
+    "async": "^1.5.0",
+    "bunyan": "^1.5.1",
+    "co": "^4.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha",
+    "debug": "nodemon | bunyan"
+  },
+  "author": "Ruan Pearce-Authers",
+  "license": "ISC"
+}
