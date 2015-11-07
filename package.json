@@ -2,13 +2,15 @@
   "name": "metagame",
   "version": "1.0.0",
   "description": "",
-  "main": "boot.js",
+  "main": "metagame.js",
   "dependencies": {
     "async": "^1.5.0",
     "bunyan": "^1.5.1",
     "co": "^4.6.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^2.3.3"
+  },
   "scripts": {
     "test": "mocha",
     "debug": "nodemon | bunyan"
