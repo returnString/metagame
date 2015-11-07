@@ -1,11 +1,9 @@
 'use strict'
 
-class DebugPlatform
+const Platform = require('../core/platform')
+
+class DebugPlatform extends Platform
 {
-	constructor()
-	{
-	}
-	
 	*authenticate(req)
 	{
 		return {
