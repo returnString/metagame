@@ -5,7 +5,7 @@ const helpers = require('./helpers')
 
 describe('auth', function()
 {
-	before(cb => helpers.boot(cb))
+	before(helpers.boot)
 	
 	it('should allow a user to authenticate and then use an authenticated endpoint', function(cb)
 	{
