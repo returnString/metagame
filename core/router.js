@@ -45,7 +45,7 @@ class Router
 		
 		let request = { params, socket }
 		
-		if (route.options.loggedIn)
+		if (route.options.authenticated)
 		{
 			request.user = this.usersBySocket.get(socket)
 			if (!request.user)

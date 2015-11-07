@@ -7,7 +7,7 @@ class SystemService extends Service
 	getRoutes()
 	{
 		return [
-			[ '/system/time', this.getTime, { loggedIn: true } ]
+			[ '/system/time', this.getTime, { authenticated: true } ]
 		]
 	}
 	
