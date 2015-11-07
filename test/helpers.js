@@ -16,7 +16,7 @@ exports.boot = function(cb)
 {
 	config.websocket.port = config.websocket.testPort
 	config.clustering.enabled = false
-	config.logging.verbosity = 100
+	config.logging.verbosity = 'error'
 	boot(cb)
 }
 
