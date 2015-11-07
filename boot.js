@@ -15,23 +15,7 @@ const co = require('co')
 const cluster = require('cluster')
 const os = require('os')
 
-function getWorkerID()
-{
-	if (cluster.isMaster)
-	{
-		return 'master'
-	}
-	else if (cluster.worker)
-	{
-		return cluster.worker.id
-	}
-	else
-	{
-		return null
-	}
-}
-
-const workerID = getWorkerID()
+const workerID = cluster.isMaster ? 'master' : cluster.worker.id
 const log = bunyan.createLogger({ name: 'boot', workerID })
 
 function initWorker()
@@ -43,6 +27,8 @@ function initWorker()
 		const servicesDir = './services/'
 		fs.readdir(servicesDir, (err, files) =>
 		{
+			if (err) return cb(err)
+			
 			for (const file of files)
 			{
 				const serviceName = file.split('.')[0]
@@ -107,6 +93,7 @@ function initWorker()
 	}
 	], err =>
 	{
+		if (err) throw err;
 		log.info('init done')
 	})
 }
