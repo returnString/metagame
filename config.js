@@ -15,4 +15,7 @@ module.exports = {
 	logging: {
 		verbosity: 'info',
 	},
+	users: {
+		allowedClients: [ 'game', 'companion' ]
+	}
 }

@@ -10,6 +10,7 @@ const errorCodes = {
 	routeNotFound: f,
 	authenticationRequired: f,
 	messageParsingFailed: f,
+	invalidParam: f,
 }
 
 const errorNames = new Map()

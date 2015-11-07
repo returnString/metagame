@@ -8,11 +8,27 @@ describe('auth', function()
 {
 	before(helpers.boot)
 	
-	it('should allow a user to authenticate and then use an authenticated endpoint', function(cb)
+	it('should allow a user to log in, use an authenticated endpoint, and log out', function(cb)
 	{
 		helpers.sequence([
-			{ path: '/auth', params: { userID: 'ruan' }, test: res => assert.equal(res.data.ok, true) },
+			{ path: '/auth/login', params: { userID: 'ruan', client: 'game', }, test: res => assert.strictEqual(res.data.ok, true) },
 			{ path: '/system/info', test: res => { assert(res.data.time); assert(res.data.version) } },
+			{ path: '/auth/logout', test: res => assert.strictEqual(res.data.ok, true) },
+			{ path: '/system/info', test: helpers.assertError(errcode.authenticationRequired()) },
+		], cb)
+	})
+	
+	it('should fail to log in if using an invalid client', function(cb)
+	{
+		helpers.sequence([
+			{ path: '/auth/login', params: { userID: 'ruan', client: 'invalid' }, test: helpers.assertError(errcode.invalidParam()) },
+		], cb)
+	})
+	
+	it('should fail to log out if not logged in', function(cb)
+	{
+		helpers.sequence([
+			{ path: '/auth/logout', test: helpers.assertError(errcode.authenticationRequired()) },
 		], cb)
 	})
 	

@@ -8,21 +8,46 @@ class Router
 	{
 		this.routes = new Map()
 		this.usersBySocket = new Map()
+		this.clientsByUserID = new Map()
 	}
 	
-	addUser(userID, socket, userData, privileges)
+	addUser(userID, socket, userData, privileges, client)
 	{
+		let clients = this.clientsByUserID.get(userID)
+		if (!clients)
+		{
+			clients = {}
+			this.clientsByUserID.set(userID, clients)
+		}
+		
+		clients[client] = socket
+		
 		this.usersBySocket.set(socket, {
 			userID,
 			socket,
 			userData,
 			privileges,
+			client,
 		})
 	}
 	
-	removeUser(userID)
+	removeUser(socket)
 	{
-		this.users.delete(userID)
+		const data = this.usersBySocket.get(socket)
+		if (!data)
+		{
+			return false
+		}
+		
+		const clients = this.clientsByUserID.get(data.userID)
+		delete clients[data.client]
+		
+		if (Object.keys(clients).length === 0)
+		{
+			this.clientsByUserID.delete(data.userID)
+		}
+		
+		return this.usersBySocket.delete(socket)
 	}
 	
 	addRoute(path, handler, options)
