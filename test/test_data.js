@@ -61,12 +61,12 @@ const grantCurrency = {
 module.exports = {
 	collections: {
 		users: {
-			instanceType: TestUser,
+			InstanceType: TestUser,
 			changes: {
 				buyItem,
 				grantCurrency,
 			},
 		},
 	},
-	errorType: TestGameError,
+	ErrorType: TestGameError,
 }

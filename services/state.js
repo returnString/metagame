@@ -84,7 +84,7 @@ class StateService extends Service
 			let instance = yield data.collection.findOneAsync({ _id: req.params.id })
 			if (!instance)
 			{
-				instance = new data.config.instanceType()
+				instance = new data.config.InstanceType()
 				instance.v = 1
 				instance._id = req.params.id
 			}
@@ -92,7 +92,7 @@ class StateService extends Service
 			for (const changeRequest of changeRequests)
 			{
 				const changeResult = yield changeRequest.change.apply(instance, changeRequest.params)
-				if (changeResult instanceof this.dataConfig.errorType)
+				if (changeResult instanceof this.dataConfig.ErrorType)
 				{
 					return errcode.changeFailed({ changeResult })
 				}
