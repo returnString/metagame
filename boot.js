@@ -132,7 +132,7 @@ module.exports = function(cb)
 		}
 		], err =>
 		{
-			if (err) throw err;
+			if (err) throw err
 			bootLog.info('init done')
 			cb()
 		})

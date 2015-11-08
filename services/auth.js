@@ -1,6 +1,6 @@
 'use strict'
 
-const Service = require('../core/service');
+const Service = require('../core/service')
 const errcode = require('../core/errcode')
 const config = require('../config')
 

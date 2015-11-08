@@ -29,7 +29,7 @@ const items = {
 const buyItem = {
 	apply: function*(testUser, params)
 	{
-		const item = items[params.itemName];
+		const item = items[params.itemName]
 		if (!item)
 		{
 			return ItemNotFoundError

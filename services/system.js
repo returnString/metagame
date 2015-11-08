@@ -1,6 +1,6 @@
 'use strict'
 
-const Service = require('../core/service');
+const Service = require('../core/service')
 const config = require('../config')
 
 class SystemService extends Service
