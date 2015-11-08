@@ -30,6 +30,13 @@ exports.assertError = function(error)
 	}
 }
 
+exports.authSequence = function(sequence, cb)
+{
+	const authStep = { path: '/auth/login', params: { userID: 'ruan', client: 'game', }, test: res => assert.strictEqual(res.data.ok, true) }
+	sequence.unshift(authStep)
+	exports.sequence(sequence, cb)
+}
+
 exports.sequence = function(sequence, cb)
 {
 	const ws = createSocket()

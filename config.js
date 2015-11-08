@@ -16,6 +16,13 @@ module.exports = {
 		verbosity: 'info',
 	},
 	users: {
-		allowedClients: [ 'game', 'companion' ]
-	}
+		allowedClients: [ 'game', 'companion' ],
+	},
+	state: {
+		mongo: {
+			host: '127.0.0.1',
+			port: 27017,
+			database: 'state',
+		},
+	},
 }

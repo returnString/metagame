@@ -7,6 +7,7 @@
     "async": "^1.5.0",
     "bunyan": "^1.5.1",
     "co": "^4.6.0",
+    "co-mongo": "0.0.2",
     "node-uuid": "^1.4.3"
   },
   "devDependencies": {
