@@ -17,8 +17,8 @@ class StateService extends Service
 	getRoutes()
 	{
 		return [
-			[ '/state/collection', this.getCollection ],
-			[ '/state/instance', this.getInstance ],
+			[ '/state/collection', this.getCollection, { authenticated: true } ],
+			[ '/state/instance', this.getInstance, { authenticated: true } ],
 		]
 	}
 	
