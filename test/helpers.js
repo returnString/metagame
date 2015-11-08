@@ -61,7 +61,7 @@ exports.sequence = function(sequence, cb)
 		
 		ws.on('message', message =>
 		{
-			var response = JSON.parse(message)
+			const response = JSON.parse(message)
 			if (response.correlation === currentTest.guid)
 			{
 				currentTest.step.test(response)
