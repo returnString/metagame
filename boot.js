@@ -40,11 +40,10 @@ module.exports = function(cb)
 		{
 			bootLog.info('initialising services')
 			
-			const servicesDir = './services/'
-			fs.readdir(servicesDir, (err, files) =>
+			co(function*()
 			{
-				if (err) return cb(err)
-				
+				const servicesDir = './services/'
+				const files = fs.readdirSync(servicesDir)
 				for (const file of files)
 				{
 					const serviceName = file.split('.')[0]
@@ -56,6 +55,11 @@ module.exports = function(cb)
 						platform,
 						router,
 					})
+					
+					if (service.init)
+					{
+						yield service.init()
+					}
 					
 					const routes = service.getRoutes()
 					for (const route of routes)
@@ -71,6 +75,9 @@ module.exports = function(cb)
 				}, 'service registered')
 				
 				cb()
+			}).catch(err =>
+			{
+				bootLog.error(err)
 			})
 		}, cb =>
 		{
@@ -113,7 +120,7 @@ module.exports = function(cb)
 					
 					co(function*()
 					{
-						const data = yield router.dispatch(requestData.path, socket, requestData.params)
+						const data = yield router.dispatch(requestData.path, socket, requestData.params || {})
 						respond(socket, data, requestData.correlation)
 					}).catch(err =>
 					{
