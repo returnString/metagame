@@ -7,10 +7,16 @@ const config = require('../config')
 const f = (data) => new MetagameError()
 
 const errorCodes = {
+	internalError: f,
 	routeNotFound: f,
 	authenticationRequired: f,
 	messageParsingFailed: f,
 	invalidParam: f,
+	collectionNotFound: f,
+	instanceNotFound: f,
+	changeNotFound: f,
+	changeFailed: f,
+	changeContention: f,
 }
 
 const errorNames = new Map()
@@ -29,6 +35,7 @@ class MetagameError
 		this.code = code
 		this.name = name
 		this.data = data
+		this.error = true
 		
 		if (config.debug)
 		{

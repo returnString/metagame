@@ -6,18 +6,36 @@ const config = require('../config')
 const async = require('async')
 const uuid = require('node-uuid')
 const assert = require('assert')
+const mongodb = require('mongodb')
+const util = require('util')
+
+let currentPort = config.websocket.testPort
 
 function createSocket()
 {
-	return new WebSocket('ws://localhost:' + config.websocket.testPort)
+	return new WebSocket('ws://localhost:' + config.websocket.port)
 }
 
 exports.boot = function(cb)
 {
-	config.websocket.port = config.websocket.testPort
+	config.websocket.port = ++currentPort
+	config.state.mongo.database = config.state.mongo.testDatabase
 	config.clustering.enabled = false
 	config.logging.verbosity = 'error'
-	boot(cb)
+	
+	boot(function()
+	{
+		const connString = util.format('mongodb://%s:%d/%s', config.state.mongo.host, config.state.mongo.port, config.state.mongo.testDatabase)
+		mongodb.MongoClient.connect(connString, function(err, db)
+		{
+			if (err) throw err
+			db.dropDatabase(function(err)
+			{
+				if (err) throw err
+				cb()
+			})
+		})
+	})
 }
 
 exports.assertError = function(error)

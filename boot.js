@@ -22,7 +22,7 @@ module.exports = function(cb)
 	const router = new Router()
 	const workerID = utils.getWorkerID()
 	
-	function initWorker()
+	function initWorker(cb)
 	{
 		async.series([cb =>
 		{
@@ -91,7 +91,6 @@ module.exports = function(cb)
 				if (data instanceof errcode.MetagameError)
 				{
 					response = data
-					response.error = true
 				}
 				else
 				{
@@ -135,6 +134,7 @@ module.exports = function(cb)
 		{
 			if (err) throw err;
 			bootLog.info('init done')
+			cb()
 		})
 	}
 	
@@ -156,7 +156,6 @@ module.exports = function(cb)
 	}
 	else
 	{
-		initWorker()
-		cb()
+		initWorker(cb)
 	}
 }
