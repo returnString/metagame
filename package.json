@@ -10,7 +10,8 @@
     "co": "^4.6.0",
     "co-mongo": "0.0.2",
     "mongodb": "^2.0.48",
-    "node-uuid": "^1.4.3"
+    "node-uuid": "^1.4.3",
+    "ws": "^0.8.0"
   },
   "devDependencies": {
     "mocha": "^2.3.3"
