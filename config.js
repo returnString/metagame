@@ -13,7 +13,7 @@ module.exports = {
 		workersPerCore: 1,
 	},
 	logging: {
-		verbosity: 'info',
+		verbosity: 'debug',
 	},
 	users: {
 		allowedClients: [ 'game', 'companion' ],

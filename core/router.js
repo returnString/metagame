@@ -2,7 +2,7 @@
 
 const errcode = require('../core/errcode')
 const co = require('co')
-const log = require('./log').create('router')
+const log = require('./log')
 const utils = require('./utils')
 
 class Router
@@ -13,6 +13,7 @@ class Router
 		this.usersBySocket = new Map()
 		this.clientsByUserID = new Map()
 		this.socketServer = socketServer
+		this.log = log.create('router')
 	}
 	
 	addUser(userID, socket, userData, privileges, client)
@@ -109,6 +110,8 @@ class Router
 		response.workerID = utils.getWorkerID()
 		response.correlation = correlation
 		socket.send(JSON.stringify(response))
+		
+		this.log.debug({ response }, 'response sent')
 	}
 	
 	onMessage(socket, message)
@@ -124,14 +127,25 @@ class Router
 			return
 		}
 		
+		this.log.debug({ requestData }, 'message received')
+		
 		const self = this
 		co(function*()
 		{
-			const data = yield self.dispatch(requestData.path, socket, requestData.params || {})
+			let data
+			try
+			{
+				data = yield self.dispatch(requestData.path, socket, requestData.params || {})
+			}
+			catch (err)
+			{
+				self.log.error(err)
+				data = errcode.internalError()
+			}
 			self.respond(socket, data, requestData.correlation)
 		}).catch(err =>
 		{
-			log.error(err)
+			self.log.error(err)
 		})
 	}
 }
