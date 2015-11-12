@@ -17,10 +17,13 @@ const exec = require('child_process').exec
 
 module.exports = function(cb)
 {
+	const server = new WebSocketServer({
+		port: config.websocket.port
+	})
+	
 	const bootLog = log.create('boot')
 	const platform = new PlatformClass()
-	const router = new Router()
-	const workerID = utils.getWorkerID()
+	const router = new Router(server)
 	
 	function initWorker(cb)
 	{
@@ -79,60 +82,11 @@ module.exports = function(cb)
 			{
 				bootLog.error(err)
 			})
-		}, cb =>
-		{
-			const server = new WebSocketServer({
-				port: config.websocket.port
-			})
-			
-			function respond(socket, data, correlation)
-			{
-				let response
-				if (data instanceof errcode.MetagameError)
-				{
-					response = data
-				}
-				else
-				{
-					response = { data }
-				}
-				
-				response.workerID = workerID
-				response.correlation = correlation
-				socket.send(JSON.stringify(response))
-			}
-			
-			server.on('connection', socket =>
-			{
-				socket.on('message', message =>
-				{
-					let requestData
-					try
-					{
-						requestData = JSON.parse(message)
-					}
-					catch (err)
-					{
-						respond(socket, errcode.messageParsingFailed())
-						return
-					}
-					
-					co(function*()
-					{
-						const data = yield router.dispatch(requestData.path, socket, requestData.params || {})
-						respond(socket, data, requestData.correlation)
-					}).catch(err =>
-					{
-						bootLog.error(err)
-					})
-				})
-			})
-			
-			cb()
-		}
+		},
 		], err =>
 		{
 			if (err) throw err
+			router.start()
 			bootLog.info('init done')
 			cb()
 		})
