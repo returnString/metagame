@@ -6,9 +6,8 @@ const config = require('../config')
 
 class AuthService extends Service
 {
-	constructor(options)
+	*init()
 	{
-		super(options)
 		this.validClients = new Set(config.users.allowedClients)
 	}
 	
