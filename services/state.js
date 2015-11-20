@@ -91,7 +91,17 @@ class StateService extends Service
 			
 			for (const changeRequest of changeRequests)
 			{
-				const changeResult = yield changeRequest.change.apply(instance, changeRequest.params)
+				let changeResult
+				try
+				{
+					changeResult = yield changeRequest.change.apply(instance, changeRequest.params)
+				}
+				catch (err)
+				{
+					this.log.error(err, 'change application error')
+					return errcode.internalError()
+				}
+				
 				if (changeResult instanceof this.dataConfig.ErrorType)
 				{
 					return errcode.changeFailed({ changeResult })
