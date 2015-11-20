@@ -17,16 +17,17 @@ const exec = require('child_process').exec
 
 module.exports = function(cb)
 {
-	const server = new WebSocketServer({
-		port: config.websocket.port
-	})
-	
 	const bootLog = log.create('boot')
 	const platform = new PlatformClass()
-	const router = new Router(server)
 	
 	function initWorker(cb)
 	{
+		const server = new WebSocketServer({
+			port: config.websocket.port
+		})
+		
+		const router = new Router(server)
+		
 		async.series([cb =>
 		{
 			exec('git describe --always', (err, stdout, stderr) =>
@@ -75,7 +76,7 @@ module.exports = function(cb)
 				}
 				bootLog.info({
 					routes: Array.from(router.routes.keys()),
-				}, 'service registered')
+				}, 'services registered')
 				
 				cb()
 			}).catch(err =>
