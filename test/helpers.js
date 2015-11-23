@@ -49,7 +49,14 @@ exports.assertError = function(error)
 
 exports.authSequence = function(sequence, cb)
 {
-	const authStep = { path: '/auth/login', params: { userID: 'ruan', client: 'game', }, test: res => assert.strictEqual(res.data.ok, true) }
+	const authStep = { path: '/auth/login', params: { userID: 'ruan', client: 'game' }, test: res => assert.strictEqual(res.data.ok, true) }
+	sequence.unshift(authStep)
+	exports.sequence(sequence, cb)
+}
+
+exports.serverAuthSequence = function(sequence, cb)
+{
+	const authStep = { path: '/auth/login', params: { server: true, client: 'game' }, test: res => assert.strictEqual(res.data.ok, true) }
 	sequence.unshift(authStep)
 	exports.sequence(sequence, cb)
 }

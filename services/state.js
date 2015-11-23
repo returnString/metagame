@@ -74,6 +74,11 @@ class StateService extends Service
 			return data
 		}
 		
+		if (!(req.params.changes instanceof Array))
+		{
+			return errcode.messageParsingFailed()
+		}
+		
 		const changeRequests = []
 		for (const changeRequest of req.params.changes)
 		{
@@ -82,6 +87,15 @@ class StateService extends Service
 			{
 				return errcode.changeNotFound()
 			}
+			
+			if (change.test)
+			{
+				if (!change.test(req.user))
+				{
+					return errcode.changeDenied()
+				}
+			}
+			
 			changeRequests.push({ change, params: changeRequest.params })
 		}
 		

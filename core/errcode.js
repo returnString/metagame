@@ -17,6 +17,7 @@ const errorCodes = {
 	changeNotFound: f,
 	changeFailed: f,
 	changeContention: f,
+	changeDenied: f,
 }
 
 for (const name in errorCodes)

@@ -22,20 +22,27 @@ describe('state', function()
 		], cb)
 	})
 	
-	it('should allow a user to modify an instance', function(cb)
-	{
-		const changes = [
-			{
-				name: 'grantCurrency',
-				params: {
-					currency: 100,
-				},
+	const grantCurrencyChanges = [
+		{
+			name: 'grantCurrency',
+			params: {
+				currency: 100,
 			},
-		]
-		
+		},
+	]
+	
+	it('should allow a user to modify an instance with the correct privileges', function(cb)
+	{
+		helpers.serverAuthSequence([
+			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: grantCurrencyChanges }, test: res => assert.strictEqual(res.data.instance.currency, 100) },
+			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: grantCurrencyChanges }, test: res => assert.strictEqual(res.data.instance.currency, 200) },
+		], cb)
+	})
+	
+	it('should reject a request to modify an instance without the correct privileges', function(cb)
+	{
 		helpers.authSequence([
-			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes }, test: res => assert.strictEqual(res.data.instance.currency, 100) },
-			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes }, test: res => assert.strictEqual(res.data.instance.currency, 200) },
+			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: grantCurrencyChanges }, test: helpers.assertError(errcode.changeDenied()) },
 		], cb)
 	})
 	

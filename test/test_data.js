@@ -50,6 +50,10 @@ const grantCurrency = {
 	{
 		testUser.currency += params.currency
 	},
+	test: function(user)
+	{
+		return user.privileges.server
+	},
 }
 
 module.exports = {
