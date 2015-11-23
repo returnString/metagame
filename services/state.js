@@ -57,7 +57,13 @@ class StateService extends Service
 			return data
 		}
 		
-		return yield data.collection.findOneAsync({ _id: req.params.id })
+		const result = yield data.collection.findOneAsync({ _id: req.params.id })
+		if (!result)
+		{
+			return errcode.instanceNotFound()
+		}
+		
+		return result
 	}
 	
 	*modify(req)

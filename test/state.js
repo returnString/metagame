@@ -15,10 +15,10 @@ describe('state', function()
 		], cb)
 	})
 	
-	it('should allow a user to view a specific instance', function(cb)
+	it('should return an error for a collection that does not exist', function(cb)
 	{
 		helpers.authSequence([
-			{ path: '/state/instance', params: { collection: 'users', id: 'test_instance' }, test: res => assert.strictEqual(res.data, null) },
+			{ path: '/state/collection', params: { collection: 'doesntexist', }, test: helpers.assertError(errcode.collectionNotFound()) },
 		], cb)
 	})
 	
@@ -36,7 +36,20 @@ describe('state', function()
 		helpers.authSequence([
 			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes }, test: res => assert.strictEqual(res.data.instance.currency, 100) },
 			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes }, test: res => assert.strictEqual(res.data.instance.currency, 200) },
+		], cb)
+	})
+	
+	it('should allow a user to view a specific instance', function(cb)
+	{
+		helpers.authSequence([
 			{ path: '/state/instance', params: { collection: 'users', id: 'test_instance' }, test: res => assert.strictEqual(res.data.currency, 200) },
+		], cb)
+	})
+		
+	it('should return an error for an instance that does not exist', function(cb)
+	{
+		helpers.authSequence([
+			{ path: '/state/instance', params: { collection: 'users', id: 'doesntexist' }, test: helpers.assertError(errcode.instanceNotFound()) },
 		], cb)
 	})
 })
