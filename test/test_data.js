@@ -43,9 +43,6 @@ const buyItem = {
 		testUser.currency -= item.currency
 		testUser.items.push(params.itemName)
 	},
-	params: {
-		itemName: String,
-	}
 }
 
 const grantCurrency = {
@@ -53,9 +50,6 @@ const grantCurrency = {
 	{
 		testUser.currency += params.currency
 	},
-	params: {
-		currency: Number,
-	}
 }
 
 module.exports = {
