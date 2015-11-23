@@ -42,9 +42,8 @@ exports.assertError = function(error)
 {
 	return res =>
 	{
-		assert.strictEqual(res.error, true)
-		assert.strictEqual(res.code, error.code)
-		assert.strictEqual(res.name, error.name)
+		assert.notEqual(res.error, null)
+		assert.strictEqual(res.error.name, error.name)
 	}
 }
 

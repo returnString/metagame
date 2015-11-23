@@ -30,7 +30,6 @@ class MetagameError
 	{
 		this.name = name
 		this.data = data
-		this.error = true
 		
 		if (config.debug)
 		{

@@ -97,19 +97,13 @@ class Router
 	
 	respond(socket, data, correlation, timeTaken)
 	{
-		let response
-		if (data instanceof errcode.MetagameError)
-		{
-			response = data
+		const dataSlot = data instanceof errcode.MetagameError ? 'error' : 'data'
+		const response = {
+			[dataSlot]: data,
+			workerID: utils.getWorkerID(),
+			timeTaken,
+			correlation,
 		}
-		else
-		{
-			response = { data }
-		}
-		
-		response.workerID = utils.getWorkerID()
-		response.correlation = correlation
-		response.timeTaken = timeTaken
 		
 		socket.send(JSON.stringify(response))
 		
