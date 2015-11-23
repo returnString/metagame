@@ -95,7 +95,7 @@ class Router
 		})
 	}
 	
-	respond(socket, data, correlation)
+	respond(socket, data, correlation, timeTaken)
 	{
 		let response
 		if (data instanceof errcode.MetagameError)
@@ -109,6 +109,8 @@ class Router
 		
 		response.workerID = utils.getWorkerID()
 		response.correlation = correlation
+		response.timeTaken = timeTaken
+		
 		socket.send(JSON.stringify(response))
 		
 		this.log.debug({ response }, 'response sent')
@@ -127,6 +129,7 @@ class Router
 			return
 		}
 		
+		const receivedAt = Date.now()
 		this.log.debug({ requestData }, 'message received')
 		
 		const self = this
@@ -142,7 +145,9 @@ class Router
 				self.log.error(err)
 				data = errcode.internalError()
 			}
-			self.respond(socket, data, requestData.correlation)
+			
+			const timeTaken = Date.now() - receivedAt
+			self.respond(socket, data, requestData.correlation, timeTaken)
 		}).catch(err =>
 		{
 			self.log.error(err)
