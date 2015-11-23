@@ -111,7 +111,6 @@ class StateService extends Service
 			const requiredVersion = instance.v
 			instance.v++
 			
-			
 			if (requiredVersion === 1)
 			{
 				try
