@@ -19,20 +19,15 @@ const errorCodes = {
 	changeContention: f,
 }
 
-const errorNames = new Map()
-let i = 0
 for (const name in errorCodes)
 {
-	const code = ++i
-	errorNames[code] = name
-	errorCodes[name] = (data) => new MetagameError(code, name, data)
+	errorCodes[name] = (data) => new MetagameError(name, data)
 }
 
 class MetagameError
 {
-	constructor(code, name, data)
+	constructor(name, data)
 	{
-		this.code = code
 		this.name = name
 		this.data = data
 		this.error = true
