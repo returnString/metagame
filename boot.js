@@ -34,8 +34,9 @@ module.exports = function(cb)
 			{
 				if (!err && stdout)
 				{
-					config.version = stdout
-					bootLog.info({ version: stdout }, 'retrieved git version')
+					const version = stdout.trim()
+					config.version = version
+					bootLog.info({ version: version }, 'retrieved git version')
 				}
 				
 				cb()
@@ -74,9 +75,6 @@ module.exports = function(cb)
 						router.addRoute(path, handler, options)
 					}
 				}
-				bootLog.info({
-					routes: Array.from(router.routes.keys()),
-				}, 'services registered')
 				
 				cb()
 			}).catch(err =>

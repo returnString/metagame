@@ -18,7 +18,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "debug": "nodemon | bunyan"
+    "start": "nodemon | bunyan"
   },
   "author": "Ruan Pearce-Authers",
   "license": "ISC"
