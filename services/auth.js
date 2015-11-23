@@ -21,7 +21,7 @@ class AuthService extends Service
 	
 	*login(req)
 	{
-		const authData = this.platform.authenticate(req)
+		const authData = yield this.platform.authenticate(req)
 		if (!this.validClients.has(req.params.client))
 		{
 			return errcode.invalidParam('client')
