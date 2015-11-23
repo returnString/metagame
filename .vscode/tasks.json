@@ -10,11 +10,14 @@
 	"version": "0.1.0",
 	"command": "npm",
 	"isShellCommand": true,
+	"showOutput": "always",
 	"tasks": [
 		{
-			"taskName": "test",
-			"showOutput": "always",
-			"args": [ "test" ]
+			"taskName": "test"
+		},
+		{
+			"taskName": "start",
+			"isBuildCommand": true
 		}
 	]
 }
