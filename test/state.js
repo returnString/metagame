@@ -46,6 +46,13 @@ describe('state', function()
 		], cb)
 	})
 	
+	it('should reject a request to modify an instance with a malformed change list', function(cb)
+	{
+		helpers.authSequence([
+			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: 1 }, test: helpers.assertError(errcode.messageParsingFailed()) },
+		], cb)
+	})
+	
 	it('should allow a user to view a specific instance', function(cb)
 	{
 		helpers.authSequence([
