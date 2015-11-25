@@ -13,8 +13,8 @@ class TestUser
 }
 
 const items = {
-	cheapItem: 100,
-	expensiveItem: 200,
+	cheapItem: { cost: 100 },
+	expensiveItem: { cost: 200 },
 }
 
 const buyItem = {
@@ -26,12 +26,12 @@ const buyItem = {
 			return errors.itemNotFoundError
 		}
 		
-		if (testUser.currency < item.currency)
+		if (testUser.currency < item.cost)
 		{
 			return errors.notEnoughCurrencyError
 		}
 		
-		testUser.currency -= item.currency
+		testUser.currency -= item.cost
 		testUser.items.push(params.itemName)
 	},
 }
@@ -47,10 +47,18 @@ const grantCurrency = {
 	},
 }
 
+const setCurrency = {
+	apply: function*(testUser, params)
+	{
+		testUser.currency = params.currency
+	},
+}
+
 module.exports = {
 	InstanceType: TestUser,
 	changes: {
 		buyItem,
 		grantCurrency,
+		setCurrency,
 	},
 }

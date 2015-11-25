@@ -31,11 +31,57 @@ describe('state', function()
 		},
 	]
 	
+	function setCurrencyRequest(currency)
+	{
+		return [
+			{
+				name: 'setCurrency',
+				params: {
+					currency,
+				},
+			},
+		]
+	}
+	
 	it('should allow a user to modify an instance with the correct privileges', function(cb)
 	{
 		helpers.serverAuthSequence([
 			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: grantCurrencyChanges }, test: res => assert.strictEqual(res.data.instance.currency, 100) },
 			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: grantCurrencyChanges }, test: res => assert.strictEqual(res.data.instance.currency, 200) },
+		], cb)
+	})
+	
+	it('should allow a user to view a specific instance', function(cb)
+	{
+		helpers.authSequence([
+			{ path: '/state/instance', params: { collection: 'users', id: 'test_instance' }, test: res => assert.strictEqual(res.data.currency, 200) },
+		], cb)
+	})
+	
+	it('should reject a request to modify an instance which triggers a game-defined error', function(cb)
+	{
+		const invalidItemRequest = [
+			{
+				name: 'buyItem',
+				params: {
+					itemName: 'doesntexist',
+				},
+			},
+		]
+		
+		const notEnoughMoneyRequest = [
+			{
+				name: 'buyItem',
+				params: {
+					itemName: 'cheapItem',
+				},
+			},
+		]
+		
+		helpers.serverAuthSequence([
+			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: invalidItemRequest }, test: helpers.assertError(errcode.changeFailed()) },
+			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: setCurrencyRequest(0) }, test: res => assert.strictEqual(res.data.instance.currency, 0) },
+			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: notEnoughMoneyRequest }, test: helpers.assertError(errcode.changeFailed()) },
 		], cb)
 	})
 	
@@ -50,13 +96,6 @@ describe('state', function()
 	{
 		helpers.authSequence([
 			{ path: '/state/modify', params: { collection: 'users', id: 'test_instance', changes: 1 }, test: helpers.assertError(errcode.messageParsingFailed()) },
-		], cb)
-	})
-	
-	it('should allow a user to view a specific instance', function(cb)
-	{
-		helpers.authSequence([
-			{ path: '/state/instance', params: { collection: 'users', id: 'test_instance' }, test: res => assert.strictEqual(res.data.currency, 200) },
 		], cb)
 	})
 		

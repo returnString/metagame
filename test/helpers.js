@@ -42,7 +42,7 @@ exports.assertError = function(error)
 {
 	return res =>
 	{
-		assert.notEqual(res.error, null, 'Expected an error')
+		assert.notEqual(res.error, null, 'Expected an error, got ' + JSON.stringify(res.data))
 		assert.strictEqual(res.error.name, error.name)
 	}
 }
