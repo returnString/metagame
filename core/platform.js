@@ -2,14 +2,14 @@
 
 function notImplemented(name)
 {
-	throw new Error('Not implemented: ' + arguments.callee.caller.name)
+	throw new Error('Not implemented: ' + name)
 }
 
 class Platform
 {
 	*authenticate(req)
 	{
-		notImplemented()
+		notImplemented('authenticate')
 	}
 }
 
