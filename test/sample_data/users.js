@@ -1,15 +1,6 @@
 'use strict'
 
-class TestGameError
-{
-	constructor(code)
-	{
-		this.code = code
-	}
-}
-
-const ItemNotFoundError = new TestGameError(1)
-const NotEnoughCurrencyError = new TestGameError(2)
+var errors = require('./errors')
 
 class TestUser
 {
@@ -32,12 +23,12 @@ const buyItem = {
 		const item = items[params.itemName]
 		if (!item)
 		{
-			return ItemNotFoundError
+			return errors.itemNotFoundError
 		}
 		
 		if (testUser.currency < item.currency)
 		{
-			return NotEnoughCurrencyError
+			return errors.notEnoughCurrencyError
 		}
 		
 		testUser.currency -= item.currency
@@ -57,14 +48,9 @@ const grantCurrency = {
 }
 
 module.exports = {
-	collections: {
-		users: {
-			InstanceType: TestUser,
-			changes: {
-				buyItem,
-				grantCurrency,
-			},
-		},
+	InstanceType: TestUser,
+	changes: {
+		buyItem,
+		grantCurrency,
 	},
-	ErrorType: TestGameError,
 }

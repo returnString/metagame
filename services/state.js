@@ -15,6 +15,10 @@ class StateService extends Service
 		const connString = util.format('mongodb://%s:%d/%s', config.state.mongo.host, config.state.mongo.port, config.state.mongo.database)
 		this.db = yield mongodb.MongoClient.connectAsync(connString)
 		this.dataConfig = require('../' + config.state.data)
+		if (!this.dataConfig.ErrorType)
+		{
+			throw new Error('State config must include ErrorType')
+		}
 	}
 	
 	getRoutes()

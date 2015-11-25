@@ -25,7 +25,7 @@ module.exports = {
 			database: 'state',
 			testDatabase: 'state_test',
 		},
-		data: 'test/test_data',
+		data: 'test/sample_data/',
 		maxRetries: 5,
 	},
 }
