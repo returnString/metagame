@@ -6,22 +6,11 @@ class DebugPlatform extends Platform
 {
 	*authenticate(req)
 	{
-		if (req.params.server)
-		{
-			return {
-				userID: 'server',
-				userData: {},
-				privileges: { server: true },
-			}
-		}
-		else
-		{
-			return {
-				userID: req.params.userID,
-				userData: {},
-				privileges: {},
-			} 
-		}
+		return {
+			userID: req.params.userID,
+			userData: {},
+			privileges: { server: req.params.server },
+		} 
 	}
 }
 
