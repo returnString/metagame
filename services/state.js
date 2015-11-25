@@ -99,7 +99,7 @@ class StateService extends Service
 			changeRequests.push({ change, params: changeRequest.params })
 		}
 		
-		for (let attempt = 0; attempt < 5; attempt++)
+		for (let attempt = 0; attempt < config.state.maxRetries; attempt++)
 		{
 			let instance = yield data.collection.findOneAsync({ _id: req.params.id })
 			if (!instance)
