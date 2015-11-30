@@ -9,7 +9,7 @@ const assert = require('assert')
 const mongodb = require('mongodb')
 const util = require('util')
 
-let currentPort = config.websocket.testPort
+let currentServer
 
 function createSocket()
 {
@@ -18,13 +18,19 @@ function createSocket()
 
 exports.boot = function(cb)
 {
-	config.websocket.port = ++currentPort
+	if (currentServer)
+	{
+		currentServer.close()
+	}
+	
+	config.websocket.port = config.websocket.testPort
 	config.state.mongo.database = config.state.mongo.testDatabase
 	config.clustering.enabled = false
 	config.logging.verbosity = 'error'
 	
-	boot(function()
+	boot(function(err, server)
 	{
+		currentServer = server
 		const connString = util.format('mongodb://%s:%d/%s', config.state.mongo.host, config.state.mongo.port, config.state.mongo.testDatabase)
 		mongodb.MongoClient.connect(connString, function(err, db)
 		{

@@ -65,7 +65,7 @@ module.exports = function(cb)
 			
 			router.start()
 			bootLog.info('init done')
-			cb()
+			cb(null, server)
 		}).catch(err =>
 		{
 			bootLog.error(err)
