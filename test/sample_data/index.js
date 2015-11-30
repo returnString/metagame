@@ -1,7 +1,7 @@
 'use strict'
 
-var errors = require('./errors')
-var users = require('./users')
+const errors = require('./errors')
+const users = require('./users')
 
 module.exports = {
 	collections: {

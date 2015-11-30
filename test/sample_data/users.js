@@ -1,6 +1,6 @@
 'use strict'
 
-var errors = require('./errors')
+const errors = require('./errors')
 
 class TestUser
 {
