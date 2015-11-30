@@ -3,6 +3,7 @@
 const ws = require('ws')
 const WebSocketServer = ws.Server
 const config = require('./config')
+const bluebird = require('bluebird')
 const fs = require('fs')
 const Router = require('./core/router')
 const async = require('async')
@@ -14,6 +15,13 @@ const os = require('os')
 const log = require('./core/log')
 const utils = require('./core/utils')
 const exec = require('child_process').exec
+
+const promisify = [ 'fs', 'mongodb' ]
+for (const moduleName of promisify)
+{
+	const module = require(moduleName)
+	bluebird.promisifyAll(module)
+}
 
 module.exports = function(cb)
 {
@@ -31,7 +39,7 @@ module.exports = function(cb)
 		co(function*()
 		{
 			const servicesDir = './services/'
-			const files = fs.readdirSync(servicesDir)
+			const files = yield fs.readdirAsync(servicesDir)
 			for (const file of files)
 			{
 				const serviceName = file.split('.')[0]

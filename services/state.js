@@ -3,9 +3,7 @@
 const Service = require('../core/service')
 const errcode = require('../core/errcode')
 const config = require('../config')
-const bluebird = require('bluebird')
 const mongodb = require('mongodb')
-bluebird.promisifyAll(mongodb)
 const util = require('util')
 const middleware = require('../core/middleware')
 
