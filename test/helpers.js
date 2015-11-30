@@ -47,6 +47,14 @@ exports.assertError = function(error)
 	}
 }
 
+exports.assertOk = function()
+{
+	return res =>
+	{
+		assert.equal(res.error, null, 'Expected no error, got ' + JSON.stringify(res.error))
+	}
+}
+
 exports.authSequence = function(sequence, cb)
 {
 	const authStep = { path: '/auth/login', params: { userID: 'ruan', client: 'game' }, test: res => assert.strictEqual(res.data.ok, true) }
