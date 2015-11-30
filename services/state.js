@@ -7,6 +7,7 @@ const bluebird = require('bluebird')
 const mongodb = require('mongodb')
 bluebird.promisifyAll(mongodb)
 const util = require('util')
+const middleware = require('../core/middleware')
 
 class StateService extends Service
 {
@@ -24,9 +25,9 @@ class StateService extends Service
 	getRoutes()
 	{
 		return [
-			[ '/state/collection', this.getCollection, { authenticated: true } ],
-			[ '/state/instance', this.getInstance, { authenticated: true } ],
-			[ '/state/modify', this.modify, { authenticated: true } ],
+			[ '/state/collection', this.getCollection, [ middleware.authenticated ] ],
+			[ '/state/instance', this.getInstance, [ middleware.authenticated ] ],
+			[ '/state/modify', this.modify, [ middleware.authenticated ] ],
 		]
 	}
 	

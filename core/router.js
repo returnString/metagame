@@ -55,14 +55,14 @@ class Router
 		return this.usersBySocket.delete(socket)
 	}
 	
-	addRoute(path, handler, options)
+	addRoute(path, handler, middleware)
 	{
 		if (this.routes.has(path))
 		{
 			throw new Error('Duplicate route: ' + path)
 		}
 		
-		this.routes.set(path, { handler, options: options || {} })
+		this.routes.set(path, { handler, middleware })
 	}
 	
 	*dispatch(path, socket, params)
@@ -75,12 +75,15 @@ class Router
 		
 		let request = { params, socket }
 		
-		if (route.options.authenticated)
+		if (route.middleware)
 		{
-			request.user = this.usersBySocket.get(socket)
-			if (!request.user)
+			for (const middleware of route.middleware)
 			{
-				return errcode.authenticationRequired()
+				const result = yield middleware(request, this)
+				if (result)
+				{
+					return result
+				}
 			}
 		}
 		

@@ -71,8 +71,8 @@ module.exports = function(cb)
 					{
 						const path = route[0]
 						const handler = route[1].bind(service)
-						const options = route[2]
-						router.addRoute(path, handler, options)
+						const middleware = route[2]
+						router.addRoute(path, handler, middleware)
 					}
 				}
 				
