@@ -22,47 +22,37 @@ class StateService extends Service
 		}
 	}
 	
-	getRoutes()
+	*getCollectionAndConfig(req)
 	{
-		return [
-			[ '/state/collection', this.getCollection, [ middleware.authenticated ] ],
-			[ '/state/instance', this.getInstance, [ middleware.authenticated ] ],
-			[ '/state/modify', this.modify, [ middleware.authenticated ] ],
-		]
-	}
-	
-	*getCollectionAndConfig(name)
-	{
+		const name = req.params.collection
 		const collectionConfig = this.dataConfig.collections[name]
 		if (!collectionConfig)
 		{
 			return errcode.collectionNotFound(name)
 		}
 		
-		return { collection: yield this.db.collectionAsync(name), config: collectionConfig }
+		req.collection = yield this.db.collectionAsync(name)
+		req.collectionConfig = collectionConfig
+	}
+	
+	getRoutes()
+	{
+		return [
+			[ '/state/collection', this.getCollection, [ middleware.authenticated, this.getCollectionAndConfig ] ],
+			[ '/state/instance', this.getInstance, [ middleware.authenticated, this.getCollectionAndConfig ] ],
+			[ '/state/modify', this.modify, [ middleware.authenticated, this.getCollectionAndConfig ] ],
+		]
 	}
 	
 	*getCollection(req)
 	{
-		const data = yield this.getCollectionAndConfig(req.params.collection)
-		if (data.error)
-		{
-			return data
-		}
-		
-		const findResult = yield data.collection.findAsync()
+		const findResult = yield req.collection.findAsync()
 		return findResult.toArray()
 	}
 	
 	*getInstance(req)
 	{
-		const data = yield this.getCollectionAndConfig(req.params.collection)
-		if (data.error)
-		{
-			return data
-		}
-		
-		const result = yield data.collection.findOneAsync({ _id: req.params.id })
+		const result = yield req.collection.findOneAsync({ _id: req.params.id })
 		if (!result)
 		{
 			return errcode.instanceNotFound()
@@ -73,12 +63,6 @@ class StateService extends Service
 	
 	*modify(req)
 	{
-		const data = yield this.getCollectionAndConfig(req.params.collection)
-		if (data.error)
-		{
-			return data
-		}
-		
 		if (!(req.params.changes instanceof Array))
 		{
 			return errcode.messageParsingFailed()
@@ -87,7 +71,7 @@ class StateService extends Service
 		const changeRequests = []
 		for (const changeRequest of req.params.changes)
 		{
-			const change = data.config.changes[changeRequest.name]
+			const change = req.collectionConfig.changes[changeRequest.name]
 			if (!change)
 			{
 				return errcode.changeNotFound()
@@ -106,10 +90,10 @@ class StateService extends Service
 		
 		for (let attempt = 0; attempt < config.state.maxRetries; attempt++)
 		{
-			let instance = yield data.collection.findOneAsync({ _id: req.params.id })
+			let instance = yield req.collection.findOneAsync({ _id: req.params.id })
 			if (!instance)
 			{
-				instance = new data.config.InstanceType()
+				instance = new req.collectionConfig.InstanceType()
 				instance.v = 1
 				instance._id = req.params.id
 			}
@@ -140,7 +124,7 @@ class StateService extends Service
 			{
 				try
 				{
-					yield data.collection.insertAsync(instance)
+					yield req.collection.insertAsync(instance)
 				}
 				catch (err)
 				{
@@ -156,7 +140,7 @@ class StateService extends Service
 			}
 			else
 			{
-				const write = yield data.collection.updateAsync({ _id: req.params.id, v: requiredVersion }, instance)
+				const write = yield req.collection.updateAsync({ _id: req.params.id, v: requiredVersion }, instance)
 				if (write.result.n === 0)
 				{
 					continue
