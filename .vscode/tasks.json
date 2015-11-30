@@ -13,7 +13,8 @@
 	"showOutput": "always",
 	"tasks": [
 		{
-			"taskName": "test"
+			"taskName": "test",
+			"isTestCommand": true
 		},
 		{
 			"taskName": "start",
