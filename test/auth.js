@@ -12,7 +12,7 @@ describe('auth', function()
 	{
 		helpers.sequence([
 			{ path: '/auth/login', params: { userID: 'ruan', client: 'game', }, test: res => assert.strictEqual(res.data.ok, true) },
-			{ path: '/system/info', test: res => { assert(res.data.time); assert(res.data.version) } },
+			{ path: '/system/info', test: res => assert.notEqual(res.data.time, null) },
 			{ path: '/auth/logout', test: res => assert.strictEqual(res.data.ok, true) },
 			{ path: '/system/info', test: helpers.assertError(errcode.authenticationRequired()) },
 		], cb)

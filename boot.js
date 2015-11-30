@@ -28,70 +28,47 @@ module.exports = function(cb)
 		
 		const router = new Router(server)
 		
-		async.series([cb =>
+		co(function*()
 		{
-			exec('git describe --always', (err, stdout, stderr) =>
+			const servicesDir = './services/'
+			const files = fs.readdirSync(servicesDir)
+			for (const file of files)
 			{
-				if (!err && stdout)
+				const serviceName = file.split('.')[0]
+				const ServiceClass = require(servicesDir + serviceName)
+				
+				const serviceLogger = log.create(serviceName)
+				const service = new ServiceClass({
+					log: serviceLogger,
+					platform,
+					router,
+				})
+				
+				if (service.init)
 				{
-					const version = stdout.trim()
-					config.version = version
-					bootLog.info({ version: version }, 'retrieved git version')
+					yield service.init()
 				}
 				
-				cb()
-			})
-		}, cb =>
-		{
-			bootLog.info('initialising services')
+				const routes = service.getRoutes()
+				for (const route of routes)
+				{
+					const path = route[0]
+					const handler = route[1].bind(service)
+					let middleware = route[2]
+					if (middleware)
+					{
+						middleware = middleware.map(func => func.bind(service))
+					}
+					router.addRoute(path, handler, middleware)
+				}
+			}
 			
-			co(function*()
-			{
-				const servicesDir = './services/'
-				const files = fs.readdirSync(servicesDir)
-				for (const file of files)
-				{
-					const serviceName = file.split('.')[0]
-					const ServiceClass = require(servicesDir + serviceName)
-					
-					const serviceLogger = log.create(serviceName)
-					const service = new ServiceClass({
-						log: serviceLogger,
-						platform,
-						router,
-					})
-					
-					if (service.init)
-					{
-						yield service.init()
-					}
-					
-					const routes = service.getRoutes()
-					for (const route of routes)
-					{
-						const path = route[0]
-						const handler = route[1].bind(service)
-						let middleware = route[2]
-						if (middleware)
-						{
-							middleware = middleware.map(func => func.bind(service))
-						}
-						router.addRoute(path, handler, middleware)
-					}
-				}
-				
-				cb()
-			}).catch(err =>
-			{
-				bootLog.error(err)
-			})
-		},
-		], err =>
-		{
-			if (err) throw err
 			router.start()
 			bootLog.info('init done')
 			cb()
+		}).catch(err =>
+		{
+			bootLog.error(err)
 		})
 	}
 	
@@ -106,7 +83,7 @@ module.exports = function(cb)
 		
 		for (let i = 0; i < workerCount; i++)
 		{
-			cluster.fork()
+			cluster.fork({ version: config.version })
 		}
 		
 		cb()

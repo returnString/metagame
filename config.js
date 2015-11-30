@@ -1,7 +1,6 @@
 'use strict'
 
 module.exports = {
-	version: 'unknown',
 	debug: false,
 	platform: 'debug',
 	websocket: {

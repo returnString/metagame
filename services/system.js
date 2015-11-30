@@ -17,7 +17,6 @@ class SystemService extends Service
 	{
 		return {
 			time: new Date().toISOString(),
-			version: config.version,
 		}
 	}
 }
