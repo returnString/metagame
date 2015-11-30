@@ -2,9 +2,9 @@
 
 const errcode = require('./errcode')
 
-exports.authenticated = function*(request, router)
+exports.authenticated = function*(request)
 {
-	request.user = router.usersBySocket.get(request.socket)
+	request.user = this.router.usersBySocket.get(request.socket)
 	if (!request.user)
 	{
 		return errcode.authenticationRequired()

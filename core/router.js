@@ -79,7 +79,7 @@ class Router
 		{
 			for (const middleware of route.middleware)
 			{
-				const result = yield middleware(request, this)
+				const result = yield middleware(request)
 				if (result)
 				{
 					return result
