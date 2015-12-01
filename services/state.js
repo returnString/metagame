@@ -5,7 +5,6 @@ const errcode = require('../core/errcode')
 const config = require('../config')
 const mongodb = require('mongodb')
 const util = require('util')
-const middleware = require('../core/middleware')
 
 class StateService extends Service
 {
@@ -35,10 +34,12 @@ class StateService extends Service
 	
 	getRoutes()
 	{
+		const middleware = [ this.authenticated, this.getCollectionAndConfig ]
+		
 		return [
-			[ '/state/collection', this.getCollection, [ middleware.authenticated, this.getCollectionAndConfig ] ],
-			[ '/state/instance', this.getInstance, [ middleware.authenticated, this.getCollectionAndConfig ] ],
-			[ '/state/modify', this.modify, [ middleware.authenticated, this.getCollectionAndConfig ] ],
+			[ '/state/collection', this.getCollection, middleware ],
+			[ '/state/instance', this.getInstance, middleware ],
+			[ '/state/modify', this.modify, middleware ],
 		]
 	}
 	

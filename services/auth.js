@@ -3,7 +3,6 @@
 const Service = require('../core/service')
 const errcode = require('../core/errcode')
 const config = require('../config')
-const middleware = require('../core/middleware')
 
 class AuthService extends Service
 {
@@ -16,7 +15,7 @@ class AuthService extends Service
 	{
 		return [
 			[ '/auth/login', this.login ],
-			[ '/auth/logout', this.logout, [ middleware.authenticated ] ],
+			[ '/auth/logout', this.logout, [ this.authenticated ] ],
 		]
 	}
 	

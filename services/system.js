@@ -2,14 +2,13 @@
 
 const Service = require('../core/service')
 const config = require('../config')
-const middleware = require('../core/middleware')
 
 class SystemService extends Service
 {
 	getRoutes()
 	{
 		return [
-			[ '/system/info', this.getInfo, [ middleware.authenticated ] ]
+			[ '/system/info', this.getInfo, [ this.authenticated ] ]
 		]
 	}
 	
