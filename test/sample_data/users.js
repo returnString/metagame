@@ -34,6 +34,10 @@ const buyItem = {
 		testUser.currency -= item.cost
 		testUser.items.push(params.itemName)
 	},
+	test: function(user, id)
+	{
+		return user.userID == id
+	}
 }
 
 const grantCurrency = {

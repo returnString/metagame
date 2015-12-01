@@ -84,7 +84,7 @@ class StateService extends Service
 			
 			if (change.test)
 			{
-				if (!change.test(req.user))
+				if (!change.test(req.user, req.params.id))
 				{
 					return errcode.changeDenied()
 				}

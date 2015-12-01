@@ -56,13 +56,25 @@ describe('state', function()
 			]
 		}
 		
+		function buyItemRequest(itemName)
+		{
+			return [
+				{
+					name: 'buyItem',
+					params: {
+						itemName,
+					},
+				},
+			]
+		}
+		
 		function modify(options)
 		{
 			return {
 				path: '/state/modify',
 				params: {
 					collection: options.collection || 'users',
-					id: options.id || 'test_instance',
+					id: options.id || 'ruan',
 					changes: options.changes,
 				},
 				test: options.test || helpers.assertOk(),
@@ -80,7 +92,7 @@ describe('state', function()
 		it('should persist changes across connections', function(cb)
 		{
 			helpers.authSequence([
-				{ path: '/state/instance', params: { collection: 'users', id: 'test_instance' }, test: res => assert.strictEqual(res.data.currency, 200) },
+				{ path: '/state/instance', params: { collection: 'users', id: 'ruan' }, test: res => assert.strictEqual(res.data.currency, 200) },
 			], cb)
 		})
 		
@@ -93,28 +105,10 @@ describe('state', function()
 		
 		it('should reject a request to modify an instance which triggers a game-defined error', function(cb)
 		{
-			const invalidItemRequest = [
-				{
-					name: 'buyItem',
-					params: {
-						itemName: 'doesntexist',
-					},
-				},
-			]
-			
-			const notEnoughMoneyRequest = [
-				{
-					name: 'buyItem',
-					params: {
-						itemName: 'cheapItem',
-					},
-				},
-			]
-			
-			helpers.serverAuthSequence([
-				modify({ changes: invalidItemRequest, test: helpers.assertError(errcode.changeFailed()) }),
+			helpers.authSequence([
+				modify({ changes: buyItemRequest('doesntexist'), test: helpers.assertError(errcode.changeFailed()) }),
 				modify({ changes: setCurrencyRequest(0), test: res => assert.strictEqual(res.data.instance.currency, 0) }),
-				modify({ changes: notEnoughMoneyRequest, test: helpers.assertError(errcode.changeFailed()) }),
+				modify({ changes: buyItemRequest('cheapItem'), test: helpers.assertError(errcode.changeFailed()) }),
 			], cb)
 		})
 		
@@ -122,6 +116,13 @@ describe('state', function()
 		{
 			helpers.authSequence([
 				modify({ changes: grantCurrencyChanges, test: helpers.assertError(errcode.changeDenied()) })
+			], cb)
+		})
+		
+		it('should reject a request to modify an instance without the correct ID-based privilege', function(cb)
+		{
+			helpers.authSequence([
+				modify({ changes: buyItemRequest('cheapItem'), id: 'notme', test: helpers.assertError(errcode.changeDenied()) })
 			], cb)
 		})
 		
