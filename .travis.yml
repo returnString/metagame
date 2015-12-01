@@ -3,3 +3,4 @@ services:
   - mongodb
 node_js:
  - "5.1"
+ - "4.2"
