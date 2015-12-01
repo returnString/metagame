@@ -3,6 +3,7 @@
 const assert = require('assert')
 const helpers = require('./helpers')
 const errcode = require('../core/errcode')
+const sample = require('./sample_data')
 
 describe('state', function()
 {
@@ -22,7 +23,14 @@ describe('state', function()
 			helpers.authSequence([
 				{ path: '/state/collection', params: { collection: 'doesntexist', }, test: helpers.assertError(errcode.collectionNotFound()) },
 			], cb)
-		})	
+		})
+		
+		it('should include advertised info for collections', function(cb)
+		{
+			helpers.authSequence([
+				{ path: '/state/advertised', params: { collection: 'users' }, test: res => assert.deepEqual(res.data.advertised, sample.collections.users.advertised) }
+			], cb)
+		})
 	})
 	
 	describe('modification', function()

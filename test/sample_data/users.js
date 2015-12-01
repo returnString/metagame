@@ -61,4 +61,7 @@ module.exports = {
 		grantCurrency,
 		setCurrency,
 	},
+	advertised: {
+		items: items,
+	},
 }

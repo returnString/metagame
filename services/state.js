@@ -38,6 +38,7 @@ class StateService extends Service
 		
 		return [
 			[ '/state/collection', this.getCollection, middleware ],
+			[ '/state/advertised', this.getAdvertised, middleware ],
 			[ '/state/instance', this.getInstance, middleware ],
 			[ '/state/modify', this.modify, middleware ],
 		]
@@ -47,6 +48,11 @@ class StateService extends Service
 	{
 		const findResult = yield req.collection.findAsync()
 		return findResult.toArray()
+	}
+	
+	*getAdvertised(req)
+	{
+		return { advertised: req.collectionConfig.advertised || {} }
 	}
 	
 	*getInstance(req)
