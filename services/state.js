@@ -13,10 +13,6 @@ class StateService extends Service
 		const connString = util.format('mongodb://%s:%d/%s', config.state.mongo.host, config.state.mongo.port, config.state.mongo.database)
 		this.db = yield mongodb.MongoClient.connectAsync(connString)
 		this.dataConfig = require('../' + config.state.data)
-		if (!this.dataConfig.ErrorType)
-		{
-			throw new Error('State config must include ErrorType')
-		}
 	}
 	
 	*getCollectionAndConfig(req)
@@ -116,7 +112,7 @@ class StateService extends Service
 					return errcode.internalError()
 				}
 				
-				if (changeResult instanceof this.dataConfig.ErrorType)
+				if (changeResult !== undefined)
 				{
 					return errcode.changeFailed({ changeResult })
 				}
