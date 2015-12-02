@@ -37,7 +37,7 @@ exports.boot = function(cb)
 		for (const prop in config.mongodb)
 		{
 			const connectionProfile = config.mongodb[prop]
-			const database = util.format('%s_%s_%s', config.sandbox, config.platform, connectionProfile.database)
+			const database = util.format('%s_%s_%s', config.sandbox, config.platform, connectionProfile.database || prop)
 			const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
 			const db = yield mongodb.MongoClient.connectAsync(connString)
 			yield db.dropDatabase()
