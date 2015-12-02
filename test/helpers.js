@@ -14,7 +14,7 @@ let currentServer
 
 function createSocket()
 {
-	return new WebSocket('ws://localhost:' + config.websocket.port)
+	return new WebSocket('ws://localhost:' + currentServer.address.port)
 }
 
 exports.boot = function(cb)
@@ -24,7 +24,7 @@ exports.boot = function(cb)
 		currentServer.close()
 	}
 	
-	config.websocket.port = config.websocket.testPort
+	config.websocket.port = 0
 	config.state.mongo.database = config.state.mongo.testDatabase
 	config.clustering.enabled = false
 	config.logging.verbosity = 'error'

@@ -102,6 +102,11 @@ class MetagameServer
 	{
 		this.server.close()
 	}
+	
+	get address()
+	{
+		return this.server._server.address()
+	}
 }
 
 if (module.parent)
