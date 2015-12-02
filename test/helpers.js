@@ -1,13 +1,14 @@
 'use strict'
 
 const WebSocket = require('ws')
-const boot = require('../boot')
+const MetagameServer = require('../metagame')
 const config = require('../config')
 const async = require('async')
 const uuid = require('node-uuid')
 const assert = require('assert')
 const mongodb = require('mongodb')
 const util = require('util')
+const co = require('co')
 
 let currentServer
 
@@ -28,19 +29,14 @@ exports.boot = function(cb)
 	config.clustering.enabled = false
 	config.logging.verbosity = 'error'
 	
-	boot(function(err, server)
+	currentServer = new MetagameServer()
+	co(function*()
 	{
-		currentServer = server
+		yield currentServer.init()
 		const connString = util.format('mongodb://%s:%d/%s', config.state.mongo.host, config.state.mongo.port, config.state.mongo.testDatabase)
-		mongodb.MongoClient.connect(connString, function(err, db)
-		{
-			if (err) throw err
-			db.dropDatabase(function(err)
-			{
-				if (err) throw err
-				cb()
-			})
-		})
+		const db = yield mongodb.MongoClient.connectAsync(connString)
+		yield db.dropDatabase()
+		cb()
 	})
 }
 
