@@ -25,7 +25,7 @@ exports.boot = function(cb)
 	}
 	
 	config.websocket.port = 0
-	config.state.mongo.database = config.state.mongo.testDatabase
+	config.sandbox = 'tests'
 	config.clustering.enabled = false
 	config.logging.verbosity = 'error'
 	
@@ -33,9 +33,16 @@ exports.boot = function(cb)
 	co(function*()
 	{
 		yield currentServer.init()
-		const connString = util.format('mongodb://%s:%d/%s', config.state.mongo.host, config.state.mongo.port, config.state.mongo.testDatabase)
-		const db = yield mongodb.MongoClient.connectAsync(connString)
-		yield db.dropDatabase()
+		
+		for (const prop in config.mongodb)
+		{
+			const connectionProfile = config.mongodb[prop]
+			const database = util.format('%s_%s_%s', config.sandbox, config.platform, connectionProfile.database)
+			const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
+			const db = yield mongodb.MongoClient.connectAsync(connString)
+			yield db.dropDatabase()
+		}
+
 		cb()
 	}).catch(cb)
 }

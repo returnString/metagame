@@ -1,6 +1,9 @@
 'use strict'
 
 const errcode = require('./errcode')
+const config = require('../config')
+const util = require('util')
+const mongodb = require('mongodb')
 
 class Service
 {
@@ -18,6 +21,19 @@ class Service
 		{
 			return errcode.authenticationRequired()
 		}
+	}
+	
+	*createMongoConnection(connectionName)
+	{
+		const connectionProfile = config.mongodb[connectionName]
+		if (!connectionProfile)
+		{
+			throw new Error('Invalid connection profile: ' + connectionName)
+		}
+		
+		const database = util.format('%s_%s_%s', config.sandbox, config.platform, connectionProfile.database)
+		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
+		return yield mongodb.MongoClient.connectAsync(connString)
 	}
 }
 

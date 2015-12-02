@@ -10,8 +10,7 @@ class StateService extends Service
 {
 	*init()
 	{
-		const connString = util.format('mongodb://%s:%d/%s', config.state.mongo.host, config.state.mongo.port, config.state.mongo.database)
-		this.db = yield mongodb.MongoClient.connectAsync(connString)
+		this.db = yield this.createMongoConnection('state')
 		this.dataConfig = require('../' + config.state.data)
 	}
 	

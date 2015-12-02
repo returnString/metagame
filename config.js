@@ -4,6 +4,7 @@ module.exports = {
 	// enables stacktraces in responses
 	debug: false,
 	platform: 'debug',
+	sandbox: 'default',
 	websocket: {
 		port: 1337,
 	},
@@ -19,13 +20,14 @@ module.exports = {
 	users: {
 		allowedClients: [ 'game', 'companion' ],
 	},
-	state: {
-		mongo: {
+	mongodb: {
+		state: {
 			host: '127.0.0.1',
 			port: 27017,
 			database: 'state',
-			testDatabase: 'state_test',
 		},
+	},
+	state: {
 		data: 'test/sample_data/',
 		// the maximum number of retries for optimistic locking on state changes
 		maxRetries: 5,
