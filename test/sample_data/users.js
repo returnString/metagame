@@ -34,7 +34,7 @@ const buyItem = {
 		testUser.currency -= item.cost
 		testUser.items.push(params.itemName)
 	},
-	test: function(user, id)
+	test: function*(user, id)
 	{
 		return user.userID == id
 	}
@@ -45,7 +45,7 @@ const grantCurrency = {
 	{
 		testUser.currency += params.currency
 	},
-	test: function(user)
+	test: function*(user)
 	{
 		return user.privileges.server
 	},

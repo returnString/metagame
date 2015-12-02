@@ -79,7 +79,8 @@ class StateService extends Service
 			
 			if (change.test)
 			{
-				if (!change.test(req.user, req.params.id))
+				const testResult = yield change.test(req.user, req.params.id)
+				if (!testResult)
 				{
 					return errcode.changeDenied()
 				}
