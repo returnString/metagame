@@ -33,11 +33,12 @@ class MetagameServer
 	
 	*initWorker()
 	{
-		this.server = new WebSocketServer({
+		this.webSocketServer = new WebSocketServer({
 			port: config.websocket.port
 		})
 		
-		const router = new Router(this.server)
+		this.httpServer = this.webSocketServer._server
+		const router = new Router(this.webSocketServer)
 		
 		const servicesDir = './services/'
 		const files = yield fs.readdirAsync(servicesDir)
@@ -100,12 +101,12 @@ class MetagameServer
 	
 	close()
 	{
-		this.server.close()
+		this.webSocketServer.close()
 	}
 	
 	get address()
 	{
-		return this.server._server.address()
+		return this.httpServer.address()
 	}
 }
 
