@@ -37,7 +37,7 @@ exports.boot = function(cb)
 		const db = yield mongodb.MongoClient.connectAsync(connString)
 		yield db.dropDatabase()
 		cb()
-	})
+	}).catch(cb)
 }
 
 exports.assertError = function(error)
