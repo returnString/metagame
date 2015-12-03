@@ -27,7 +27,7 @@ class AuthService extends Service
 			return errcode.invalidParam('client')
 		}
 		
-		this.router.addUser(authData.userID, req.socket, authData.userData, authData.privileges, req.params.client)
+		this.router.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client)
 		return { ok: true }
 	}
 	

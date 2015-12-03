@@ -16,21 +16,21 @@ class Router
 		this.log = log.create('router')
 	}
 	
-	addUser(userID, socket, userData, privileges, client)
+	addUser(id, socket, platformData, privileges, client)
 	{
-		let clients = this.clientsByUserID.get(userID)
+		let clients = this.clientsByUserID.get(id)
 		if (!clients)
 		{
 			clients = {}
-			this.clientsByUserID.set(userID, clients)
+			this.clientsByUserID.set(id, clients)
 		}
 		
 		clients[client] = socket
 		
 		this.usersBySocket.set(socket, {
-			userID,
+			id,
 			socket,
-			userData,
+			platformData,
 			privileges,
 			client,
 		})
@@ -44,12 +44,12 @@ class Router
 			return false
 		}
 		
-		const clients = this.clientsByUserID.get(data.userID)
+		const clients = this.clientsByUserID.get(data.id)
 		delete clients[data.client]
 		
 		if (Object.keys(clients).length === 0)
 		{
-			this.clientsByUserID.delete(data.userID)
+			this.clientsByUserID.delete(data.id)
 		}
 		
 		return this.usersBySocket.delete(socket)

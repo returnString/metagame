@@ -36,7 +36,7 @@ const buyItem = {
 	},
 	test: function*(user, id)
 	{
-		return user.userID == id
+		return user.id == id
 	}
 }
 

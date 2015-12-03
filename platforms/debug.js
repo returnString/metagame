@@ -7,8 +7,8 @@ class DebugPlatform extends Platform
 	*authenticate(req)
 	{
 		return {
-			userID: req.params.userID,
-			userData: {},
+			id: req.params.userID,
+			platformData: {},
 			privileges: { server: req.params.server },
 		} 
 	}
