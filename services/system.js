@@ -4,10 +4,12 @@ module.exports = function*(core)
 {
 	class SystemService extends core.Service
 	{
+		get name() { return 'system' }
+		
 		getRoutes()
 		{
 			return [
-				[ '/system/info', this.getInfo, [ this.authenticated ] ]
+				[ 'info', this.getInfo, [ this.authenticated ] ]
 			]
 		}
 		

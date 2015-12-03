@@ -9,6 +9,8 @@ module.exports = function*(core)
 	
 	class StateService extends core.Service
 	{
+		get name() { return 'state' }
+		
 		*init()
 		{
 			this.db = yield this.createMongoConnection('state')
@@ -33,10 +35,10 @@ module.exports = function*(core)
 			const middleware = [ this.authenticated, this.getCollectionAndConfig ]
 			
 			return [
-				[ '/state/collection', this.getCollection, middleware ],
-				[ '/state/advertised', this.getAdvertised, middleware ],
-				[ '/state/instance', this.getInstance, middleware ],
-				[ '/state/modify', this.modify, middleware ],
+				[ 'collection', this.getCollection, middleware ],
+				[ 'advertised', this.getAdvertised, middleware ],
+				[ 'instance', this.getInstance, middleware ],
+				[ 'modify', this.modify, middleware ],
 			]
 		}
 		

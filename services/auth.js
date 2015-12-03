@@ -7,6 +7,8 @@ module.exports = function*(core)
 	
 	class AuthService extends core.Service
 	{
+		get name() { return 'auth' }
+		
 		*init()
 		{
 			this.validClients = new Set(config.users.allowedClients)
@@ -15,8 +17,8 @@ module.exports = function*(core)
 		getRoutes()
 		{
 			return [
-				[ '/auth/login', this.login ],
-				[ '/auth/logout', this.logout, [ this.authenticated ] ],
+				[ 'login', this.login ],
+				[ 'logout', this.logout, [ this.authenticated ] ],
 			]
 		}
 		
