@@ -3,7 +3,7 @@
 module.exports = {
 	// enables stacktraces in responses
 	debug: false,
-	platform: 'debug',
+	platform: 'platforms/debug',
 	sandbox: 'default',
 	websocket: {
 		port: 1337,

@@ -1,40 +1,42 @@
 'use strict'
 
-const Service = require('../core/service')
-const errcode = require('../core/errcode')
-const config = require('../config')
-
-class AuthService extends Service
+module.exports = function*(core)
 {
-	*init()
-	{
-		this.validClients = new Set(config.users.allowedClients)
-	}
+	const config = core.config
+	const errcode = core.errcode
 	
-	getRoutes()
+	class AuthService extends core.Service
 	{
-		return [
-			[ '/auth/login', this.login ],
-			[ '/auth/logout', this.logout, [ this.authenticated ] ],
-		]
-	}
-	
-	*login(req)
-	{
-		const authData = yield this.platform.authenticate(req)
-		if (!this.validClients.has(req.params.client))
+		*init()
 		{
-			return errcode.invalidParam('client')
+			this.validClients = new Set(config.users.allowedClients)
 		}
 		
-		this.router.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client)
-		return { ok: true }
+		getRoutes()
+		{
+			return [
+				[ '/auth/login', this.login ],
+				[ '/auth/logout', this.logout, [ this.authenticated ] ],
+			]
+		}
+		
+		*login(req)
+		{
+			const authData = yield this.platform.authenticate(req)
+			if (!this.validClients.has(req.params.client))
+			{
+				return errcode.invalidParam('client')
+			}
+			
+			this.router.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client)
+			return { ok: true }
+		}
+		
+		*logout(req)
+		{
+			return { ok: this.router.removeUser(req.socket) }
+		}
 	}
 	
-	*logout(req)
-	{
-		return { ok: this.router.removeUser(req.socket) }
-	}
+	return AuthService
 }
-
-module.exports = AuthService

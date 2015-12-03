@@ -7,7 +7,6 @@ const bluebird = require('bluebird')
 const fs = require('fs')
 const Router = require('./core/router')
 const async = require('async')
-const PlatformClass = require('./platforms/' + config.platform)
 const errcode = require('./core/errcode')
 const co = require('co')
 const cluster = require('cluster')
@@ -15,6 +14,10 @@ const os = require('os')
 const log = require('./core/log')
 const utils = require('./core/utils')
 const exec = require('child_process').exec
+const core = require('./core')
+const path = require('path')
+
+core.require = modulePath => require(path.resolve(process.cwd(), modulePath))
 
 const promisify = [ 'fs', 'mongodb' ]
 for (const moduleName of promisify)
@@ -28,11 +31,14 @@ class MetagameServer
 	constructor()
 	{
 		this.log = log.create('server')
-		this.platform = new PlatformClass()
 	}
 	
 	*initWorker()
 	{
+		const platformClassCreator = core.require(config.platform)
+		const PlatformClass = yield platformClassCreator(core)
+		this.platform = new PlatformClass()
+		
 		this.webSocketServer = new WebSocketServer({
 			port: config.websocket.port
 		})
@@ -45,8 +51,8 @@ class MetagameServer
 		for (const file of files)
 		{
 			const serviceName = file.split('.')[0]
-			const ServiceClass = require(servicesDir + serviceName)
-			
+			const serviceClassCreator = require(servicesDir + serviceName)
+			const ServiceClass = yield serviceClassCreator(core)
 			const serviceLogger = log.create(serviceName)
 			const service = new ServiceClass({
 				log: serviceLogger,

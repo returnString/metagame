@@ -1,17 +1,20 @@
 'use strict'
 
-const Platform = require('../core/platform')
-
-class DebugPlatform extends Platform
+module.exports = function*(core)
 {
-	*authenticate(req)
+	class DebugPlatform extends core.Platform
 	{
-		return {
-			id: req.params.userID,
-			platformData: {},
-			privileges: { server: req.params.server },
-		} 
+		get name() { return 'debug' }
+		
+		*authenticate(req)
+		{
+			return {
+				id: req.params.userID,
+				platformData: {},
+				privileges: { server: req.params.server },
+			} 
+		}
 	}
+	
+	return DebugPlatform
 }
-
-module.exports = DebugPlatform

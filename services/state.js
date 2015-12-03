@@ -1,158 +1,160 @@
 'use strict'
 
-const Service = require('../core/service')
-const errcode = require('../core/errcode')
-const config = require('../config')
-const mongodb = require('mongodb')
 const util = require('util')
 
-class StateService extends Service
+module.exports = function*(core)
 {
-	*init()
-	{
-		this.db = yield this.createMongoConnection('state')
-		this.dataConfig = require('../' + config.state.data)
-	}
+	const config = core.config
+	const errcode = core.errcode
 	
-	*getCollectionAndConfig(req)
+	class StateService extends core.Service
 	{
-		const name = req.params.collection
-		const collectionConfig = this.dataConfig.collections[name]
-		if (!collectionConfig)
+		*init()
 		{
-			return errcode.collectionNotFound(name)
+			this.db = yield this.createMongoConnection('state')
+			this.dataConfig = core.require(config.state.data)
 		}
 		
-		req.collection = yield this.db.collectionAsync(name)
-		req.collectionConfig = collectionConfig
-	}
-	
-	getRoutes()
-	{
-		const middleware = [ this.authenticated, this.getCollectionAndConfig ]
-		
-		return [
-			[ '/state/collection', this.getCollection, middleware ],
-			[ '/state/advertised', this.getAdvertised, middleware ],
-			[ '/state/instance', this.getInstance, middleware ],
-			[ '/state/modify', this.modify, middleware ],
-		]
-	}
-	
-	*getCollection(req)
-	{
-		const findResult = yield req.collection.findAsync()
-		return findResult.toArray()
-	}
-	
-	*getAdvertised(req)
-	{
-		return { advertised: req.collectionConfig.advertised || {} }
-	}
-	
-	*getInstance(req)
-	{
-		const result = yield req.collection.findOneAsync({ _id: req.params.id })
-		if (!result)
+		*getCollectionAndConfig(req)
 		{
-			return errcode.instanceNotFound()
-		}
-		
-		return result
-	}
-	
-	*modify(req)
-	{
-		if (!(req.params.changes instanceof Array))
-		{
-			return errcode.messageParsingFailed()
-		}
-		
-		const changeRequests = []
-		for (const changeRequest of req.params.changes)
-		{
-			const change = req.collectionConfig.changes[changeRequest.name]
-			if (!change)
+			const name = req.params.collection
+			const collectionConfig = this.dataConfig.collections[name]
+			if (!collectionConfig)
 			{
-				return errcode.changeNotFound()
+				return errcode.collectionNotFound(name)
 			}
 			
-			if (change.test)
-			{
-				const testResult = yield change.test(req.user, req.params.id)
-				if (!testResult)
-				{
-					return errcode.changeDenied()
-				}
-			}
-			
-			changeRequests.push({ change, params: changeRequest.params })
+			req.collection = yield this.db.collectionAsync(name)
+			req.collectionConfig = collectionConfig
 		}
 		
-		for (let attempt = 0; attempt < config.state.maxRetries; attempt++)
+		getRoutes()
 		{
-			let instance = yield req.collection.findOneAsync({ _id: req.params.id })
-			if (!instance)
+			const middleware = [ this.authenticated, this.getCollectionAndConfig ]
+			
+			return [
+				[ '/state/collection', this.getCollection, middleware ],
+				[ '/state/advertised', this.getAdvertised, middleware ],
+				[ '/state/instance', this.getInstance, middleware ],
+				[ '/state/modify', this.modify, middleware ],
+			]
+		}
+		
+		*getCollection(req)
+		{
+			const findResult = yield req.collection.findAsync()
+			return findResult.toArray()
+		}
+		
+		*getAdvertised(req)
+		{
+			return { advertised: req.collectionConfig.advertised || {} }
+		}
+		
+		*getInstance(req)
+		{
+			const result = yield req.collection.findOneAsync({ _id: req.params.id })
+			if (!result)
 			{
-				instance = new req.collectionConfig.InstanceType()
-				instance.v = 1
-				instance._id = req.params.id
+				return errcode.instanceNotFound()
 			}
 			
-			for (const changeRequest of changeRequests)
+			return result
+		}
+		
+		*modify(req)
+		{
+			if (!(req.params.changes instanceof Array))
 			{
-				let changeResult
-				try
+				return errcode.messageParsingFailed()
+			}
+			
+			const changeRequests = []
+			for (const changeRequest of req.params.changes)
+			{
+				const change = req.collectionConfig.changes[changeRequest.name]
+				if (!change)
 				{
-					changeResult = yield changeRequest.change.apply(instance, changeRequest.params)
-				}
-				catch (err)
-				{
-					this.log.error(err, 'change application error')
-					return errcode.internalError()
+					return errcode.changeNotFound()
 				}
 				
-				if (changeResult !== undefined)
+				if (change.test)
 				{
-					return errcode.changeFailed({ changeResult })
+					const testResult = yield change.test(req.user, req.params.id)
+					if (!testResult)
+					{
+						return errcode.changeDenied()
+					}
 				}
+				
+				changeRequests.push({ change, params: changeRequest.params })
 			}
 			
-			const requiredVersion = instance.v
-			instance.v++
-			
-			if (requiredVersion === 1)
+			for (let attempt = 0; attempt < config.state.maxRetries; attempt++)
 			{
-				try
+				let instance = yield req.collection.findOneAsync({ _id: req.params.id })
+				if (!instance)
 				{
-					yield req.collection.insertAsync(instance)
+					instance = new req.collectionConfig.InstanceType()
+					instance.v = 1
+					instance._id = req.params.id
 				}
-				catch (err)
+				
+				for (const changeRequest of changeRequests)
 				{
-					if (err.code === 11000)
+					let changeResult
+					try
+					{
+						changeResult = yield changeRequest.change.apply(instance, changeRequest.params)
+					}
+					catch (err)
+					{
+						this.log.error(err, 'change application error')
+						return errcode.internalError()
+					}
+					
+					if (changeResult !== undefined)
+					{
+						return errcode.changeFailed({ changeResult })
+					}
+				}
+				
+				const requiredVersion = instance.v
+				instance.v++
+				
+				if (requiredVersion === 1)
+				{
+					try
+					{
+						yield req.collection.insertAsync(instance)
+					}
+					catch (err)
+					{
+						if (err.code === 11000)
+						{
+							continue
+						}
+						else
+						{
+							return errcode.internalError()
+						}
+					}
+				}
+				else
+				{
+					const write = yield req.collection.updateAsync({ _id: req.params.id, v: requiredVersion }, instance)
+					if (write.result.n === 0)
 					{
 						continue
 					}
-					else
-					{
-						return errcode.internalError()
-					}
 				}
-			}
-			else
-			{
-				const write = yield req.collection.updateAsync({ _id: req.params.id, v: requiredVersion }, instance)
-				if (write.result.n === 0)
-				{
-					continue
-				}
+				
+				return { instance }
 			}
 			
-			return { instance }
+			return errcode.changeContention()
 		}
-		
-		return errcode.changeContention()
 	}
+	
+	return StateService
 }
-
-module.exports = StateService

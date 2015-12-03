@@ -1,23 +1,23 @@
 'use strict'
 
-const Service = require('../core/service')
-const config = require('../config')
-
-class SystemService extends Service
+module.exports = function*(core)
 {
-	getRoutes()
+	class SystemService extends core.Service
 	{
-		return [
-			[ '/system/info', this.getInfo, [ this.authenticated ] ]
-		]
-	}
-	
-	*getInfo(params)
-	{
-		return {
-			time: new Date().toISOString(),
+		getRoutes()
+		{
+			return [
+				[ '/system/info', this.getInfo, [ this.authenticated ] ]
+			]
+		}
+		
+		*getInfo(params)
+		{
+			return {
+				time: new Date().toISOString(),
+			}
 		}
 	}
+	
+	return SystemService
 }
-
-module.exports = SystemService
