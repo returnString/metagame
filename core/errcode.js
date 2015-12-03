@@ -1,34 +1,32 @@
 'use strict'
 
-const util = require('util')
 const config = require('../config')
 
-// Force intellisense to play nicely
-const f = (data) => new MetagameError()
-
 const errorCodes = {
-	internalError: f,
-	routeNotFound: f,
-	authenticationRequired: f,
-	messageParsingFailed: f,
-	invalidParam: f,
-	collectionNotFound: f,
-	instanceNotFound: f,
-	changeNotFound: f,
-	changeFailed: f,
-	changeContention: f,
-	changeDenied: f,
+	internalError: 1,
+	routeNotFound: 2,
+	authenticationRequired: 3,
+	messageParsingFailed: 4,
+	invalidParam: 5,
+	collectionNotFound: 6,
+	instanceNotFound: 7,
+	changeNotFound: 8,
+	changeFailed: 9,
+	changeContention: 10,
+	changeDenied: 11,
 }
 
 for (const name in errorCodes)
 {
-	errorCodes[name] = (data) => new MetagameError(name, data)
+	const code = errorCodes[name]
+	exports[name] = (data) => new MetagameError(code, name, data)
 }
 
 class MetagameError
 {
-	constructor(name, data)
+	constructor(code, name, data)
 	{
+		this.code = code
 		this.name = name
 		this.data = data
 		
@@ -39,5 +37,4 @@ class MetagameError
 	}
 }
 
-module.exports = errorCodes
-module.exports.MetagameError = MetagameError
+exports.MetagameError = MetagameError

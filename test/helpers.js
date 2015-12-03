@@ -3,7 +3,6 @@
 const WebSocket = require('ws')
 const MetagameServer = require('../metagame')
 const config = require('../config')
-const async = require('async')
 const uuid = require('node-uuid')
 const assert = require('assert')
 const mongodb = require('mongodb')
