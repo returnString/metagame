@@ -14,6 +14,7 @@ const log = require('./core/log')
 const utils = require('./core/utils')
 const core = require('./core')
 const path = require('path')
+const UserMap = require('./core/usermap')
 
 core.require = modulePath => require(path.resolve(process.cwd(), modulePath))
 
@@ -29,6 +30,7 @@ class MetagameServer
 	constructor()
 	{
 		this.log = log.create('server')
+		this.userMap = new UserMap()
 	}
 	
 	*initWorker()
@@ -56,6 +58,7 @@ class MetagameServer
 				log: serviceLogger,
 				platform: this.platform,
 				router,
+				userMap: this.userMap,
 			})
 			
 			if (service.init)

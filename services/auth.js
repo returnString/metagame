@@ -30,13 +30,13 @@ module.exports = function*(core)
 				return errcode.invalidParam('client')
 			}
 			
-			this.router.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client)
+			this.userMap.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client)
 			return { ok: true }
 		}
 		
 		*logout(req)
 		{
-			return { ok: this.router.removeUser(req.socket) }
+			return { ok: this.userMap.removeUser(req.socket) }
 		}
 	}
 	

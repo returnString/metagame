@@ -11,12 +11,12 @@ class Service
 	{
 		this.log = options.log
 		this.platform = options.platform
-		this.router = options.router
+		this.userMap = options.userMap
 	}
 	
 	*authenticated(request)
 	{
-		request.user = this.router.usersBySocket.get(request.socket)
+		request.user = this.userMap.usersBySocket.get(request.socket)
 		if (!request.user)
 		{
 			return errcode.authenticationRequired()
