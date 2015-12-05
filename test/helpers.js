@@ -8,6 +8,7 @@ const assert = require('assert')
 const mongodb = require('mongodb')
 const util = require('util')
 const co = require('co')
+require('mocha-generators').install()
 
 let currentServer
 
@@ -16,7 +17,7 @@ function createSocket()
 	return new WebSocket('ws://localhost:' + currentServer.address.port)
 }
 
-exports.boot = function(cb)
+exports.boot = function*()
 {
 	if (currentServer)
 	{
@@ -29,21 +30,16 @@ exports.boot = function(cb)
 	config.logging.verbosity = 'error'
 	
 	currentServer = new MetagameServer()
-	co(function*()
+	yield currentServer.init()
+	
+	for (const prop in config.mongodb)
 	{
-		yield currentServer.init()
-		
-		for (const prop in config.mongodb)
-		{
-			const connectionProfile = config.mongodb[prop]
-			const database = util.format('%s_%s_%s', config.sandbox, currentServer.platform.name, connectionProfile.database || prop)
-			const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
-			const db = yield mongodb.MongoClient.connectAsync(connString)
-			yield db.dropDatabase()
-		}
-
-		cb()
-	}).catch(cb)
+		const connectionProfile = config.mongodb[prop]
+		const database = util.format('%s_%s_%s', config.sandbox, currentServer.platform.name, connectionProfile.database || prop)
+		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
+		const db = yield mongodb.MongoClient.connectAsync(connString)
+		yield db.dropDatabase()
+	}
 }
 
 exports.assertError = function(error)
