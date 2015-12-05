@@ -20,7 +20,7 @@ with specialised app servers will probably want to use SSL termination.
 ## Authentication
 The auth service delegates to a platform-specific authentication method.
 The platform takes an auth request and tells metagame the user's:
-- user ID: permament identifier, like a numeric Steam ID)
+- user ID: permament identifier, like a numeric Steam ID
 - platform-specific data: changeable data, like a display name/gamertag
 - privileges
 
