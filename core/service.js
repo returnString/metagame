@@ -12,13 +12,32 @@ class Service
 		this.config = options.config
 		this.platform = options.platform
 		this.userMap = options.userMap
-		this.errors = new ErrorContainer(this.name, this.config)
+		this.errors = new ErrorContainer(this.getName(), this.config)
 		if (this.serviceErrors)
 		{
 			for (const error of this.serviceErrors)
 			{
 				this.errors.register(error)
 			}
+		}
+	}
+	
+	getName()
+	{
+		const autoNameSearch = 'service'
+		const lowerCaseCtor = this.constructor.name.toLowerCase()
+		
+		if (this.name)
+		{
+			return this.name
+		}
+		else if (lowerCaseCtor.endsWith(autoNameSearch))
+		{
+			return lowerCaseCtor.substring(0, lowerCaseCtor.length - autoNameSearch.length)
+		}
+		else
+		{
+			return lowerCaseCtor
 		}
 	}
 	

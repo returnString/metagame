@@ -4,8 +4,6 @@ module.exports = function*(loader)
 {
 	class AuthService extends loader.Service
 	{
-		get name() { return 'auth' }
-		
 		*init()
 		{
 			this.validClients = new Set(this.config.users.allowedClients)

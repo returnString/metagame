@@ -4,7 +4,6 @@ module.exports = function*(loader)
 {
 	class StateService extends loader.Service
 	{
-		get name() { return 'state' }
 		get serviceErrors() { return [
 			'instanceNotFound',
 			'collectionNotFound',

@@ -101,7 +101,7 @@ class MetagameServer
 			const routes = service.getRoutes()
 			for (const route of routes)
 			{
-				const path = '/' + service.name + '/' + route[0]
+				const path = '/' + service.getName() + '/' + route[0]
 				const handler = route[1].bind(service)
 				let middleware = route[2]
 				if (middleware)

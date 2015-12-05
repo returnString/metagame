@@ -4,8 +4,6 @@ module.exports = function*(loader)
 {
 	class SystemService extends loader.Service
 	{
-		get name() { return 'system' }
-		
 		getRoutes()
 		{
 			return [

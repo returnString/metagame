@@ -62,9 +62,6 @@ module.exports = function*(loader)
 {
 	class CalculatorService extends loader.Service
 	{
-		// the name of the service, used to build the command routes
-		get name() { return 'calculator' }
-		
 		// the possible errors this service can return
 		// they'll be prefixed with the service name, eg 'calculator/missingSide'
 		get serviceErrors() { return [
