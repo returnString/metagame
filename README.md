@@ -36,3 +36,77 @@ and can be used to model anything from secure player inventories to world state.
 
 # Dependencies
 - mongodb
+- redis (not yet used in stock services)
+
+# Extension
+
+## Services
+This is a simple example of a loading a calculator service that adds two numbers together on request.
+
+To load a new service, just add its file path to your config file, in the services section:
+```javascript
+module.exports = {
+	...
+	services: [
+		'services/auth',
+		'services/state',
+		'services/system',
+		'/some/long/file/path/calculatorservice',
+	],
+	...
+```
+
+Here's the contents of calculatorservice.js:
+```javascript
+module.exports = function*(loader)
+{
+	class CalculatorService extends loader.Service
+	{
+		// the name of the service, used to build the command routes
+		get name() { return 'calculator' }
+		
+		// the possible errors this service can return
+		// they'll be prefixed with the service name, eg 'calculator/missingSide'
+		get serviceErrors() { return [
+			'missingSide',
+		]}
+		
+		// do async initialisation here
+		// good for creating DB connections, loading files into memory etc
+		*init()
+		{
+		}
+		
+		*requireLeftAndRight(request)
+		{
+			if (!request.params.lhs || !request.params.rhs)
+			{
+				// this error will be shown to the client as:
+				// { error: { name: 'calculator/missingSide' } }
+				return this.errors.missingSide()
+			}
+		}
+		
+		// tell the metagame router what commands to expose
+		// each route is an array consisting of the name, function to call and any middleware to call before it
+		getRoutes()
+		{
+			return [
+				// this command will be exposed as '/calculator/add'
+				// with the two middleware functions, it will reject unauthenticated users and requests that don't contain lhs and rhs params
+				[ 'add', this.add, [ this.authenticated, this.requireLeftAndRight ] ],	
+			]	
+		}
+		
+		*add(request)
+		{
+			// this is what the client will see; the whole response will look something like:
+			// { data: { result: <x> } }
+			return { result: request.lhs + request.rhs }
+		}
+	}
+}
+```
+
+## Platforms
+// TODO
