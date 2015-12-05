@@ -14,6 +14,9 @@ Unofficially, it's primarily developed on OSX, but CI doesn't cover that.
 ## Protocol
 metagame uses websockets with JSON messages for all communication.
 
+It also includes built-in SSL support, although more complex deployments
+with specialised app servers will probably want to use SSL termination.
+
 ## Authentication
 The auth service delegates to a platform-specific authentication method.
 The platform takes an auth request and tells metagame the user's:
