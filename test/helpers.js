@@ -8,17 +8,23 @@ const assert = require('assert')
 const mongodb = require('mongodb')
 const util = require('util')
 const co = require('co')
-require('mocha-generators').install()
 
 let currentServer
 
-function createSocket()
+function* createSocket()
 {
-	return new WebSocket('ws://localhost:' + currentServer.address.port)
+	const ws = new WebSocket('ws://localhost:' + currentServer.address.port)
+	return new Promise(resolve =>
+	{
+		ws.on('open', () =>
+		{
+			resolve(ws)
+		})
+	})
 }
 
-exports.boot = function*()
-{
+function* boot()
+{	
 	if (currentServer)
 	{
 		currentServer.close()
@@ -42,74 +48,77 @@ exports.boot = function*()
 	}
 }
 
-exports.assertError = function(error)
+function assertError(error)
 {
 	return res =>
 	{
 		assert.notEqual(res.error, null, 'Expected an error, got ' + JSON.stringify(res.data))
 		assert.strictEqual(res.error.name, error.name)
+		assert.strictEqual(res.error.code, error.code)
 	}
 }
 
-exports.assertOk = function()
+function assertOk(res)
 {
-	return res =>
-	{
-		assert.equal(res.error, null, 'Expected no error, got ' + JSON.stringify(res.error))
-	}
+	assert.equal(res.error, null, 'Expected no error, got ' + JSON.stringify(res.error))
 }
 
-exports.authSequence = function(sequence, cb)
+function request(ws, path, params, tests)
 {
-	const authStep = { path: '/auth/login', params: { userID: 'ruan', client: 'game' }, test: res => assert.strictEqual(res.data.ok, true) }
-	sequence.unshift(authStep)
-	exports.sequence(sequence, cb)
-}
-
-exports.serverAuthSequence = function(sequence, cb)
-{
-	const authStep = { path: '/auth/login', params: { server: true, client: 'game' }, test: res => assert.strictEqual(res.data.ok, true) }
-	sequence.unshift(authStep)
-	exports.sequence(sequence, cb)
-}
-
-exports.sequence = function(sequence, cb)
-{
-	const ws = createSocket()
-	const tests = sequence.map(step => { return { guid: uuid.v4(), step } })
-	let testIndex = 0
-	let currentTest
+	const correlation = uuid.v4()
+	const messageToSend = { path, params, correlation }
 	
-	function nextTest()
+	if (!tests)
 	{
-		currentTest = tests[testIndex]
-		const step = currentTest.step
-		
-		testIndex++
-		
-		const message = { path: step.path, params: step.params, correlation: currentTest.guid }
-		ws.send(JSON.stringify(message))
+		tests = [ assertOk ]
+	}
+	else if (!Array.isArray(tests))
+	{
+		tests = [ tests ]
 	}
 	
-	ws.on('open', () =>
+	const promise = new Promise(resolve =>
 	{
-		nextTest()
-		
-		ws.on('message', message =>
+		ws.on('message', function gotMessage(message)
 		{
 			const response = JSON.parse(message)
-			if (response.correlation === currentTest.guid)
+			if (response.correlation === correlation)
 			{
-				currentTest.step.test(response)
-				if (testIndex === tests.length)
+				for (const test of tests)
 				{
-					cb()
+					test(response)
 				}
-				else
-				{
-					nextTest()
-				}
+				
+				ws.removeListener('message', gotMessage)
+				resolve()
 			}
 		})
 	})
+	
+	ws.send(JSON.stringify(messageToSend))
+	return promise
+}
+
+function* createAuthedSocket(userID, client)
+{
+	const ws = yield createSocket()
+	yield request(ws, '/auth/login', { userID: userID || 'ruan', client: client || 'game' })
+	return ws
+}
+
+function* createServerSocket()
+{
+	const ws = yield createSocket()
+	yield request(ws, '/auth/login', { server: true, client: 'game' })
+	return ws
+}
+
+module.exports = {
+	boot,
+	createSocket,
+	createAuthedSocket,
+	createServerSocket,
+	request,
+	assertOk,
+	assertError,
 }

@@ -1,5 +1,6 @@
 'use strict'
 
+require('./setup')()
 const assert = require('assert')
 const helpers = require('./helpers')
 const errcode = require('../core/errcode')
@@ -8,34 +9,29 @@ describe('auth', function()
 {
 	before(helpers.boot)
 	
-	it('should allow a user to log in, use an authenticated endpoint, and log out', function(cb)
+	it('should allow a user to log in, use an authenticated endpoint, and log out', function*()
 	{
-		helpers.sequence([
-			{ path: '/auth/login', params: { userID: 'ruan', client: 'game', }, test: res => assert.strictEqual(res.data.ok, true) },
-			{ path: '/system/info', test: res => assert.notEqual(res.data.time, null) },
-			{ path: '/auth/logout', test: res => assert.strictEqual(res.data.ok, true) },
-			{ path: '/system/info', test: helpers.assertError(errcode.authenticationRequired()) },
-		], cb)
+		const ws = yield helpers.createAuthedSocket()
+		yield helpers.request(ws, '/system/info', {}, res => assert.notEqual(res.data.time, null))
+		yield helpers.request(ws, '/auth/logout')
+		yield helpers.request(ws, '/system/info', {}, helpers.assertError(errcode.authenticationRequired()))
 	})
 	
-	it('should fail to log in if using an invalid client', function(cb)
+	it('should fail to log in if using an invalid client', function*()
 	{
-		helpers.sequence([
-			{ path: '/auth/login', params: { userID: 'ruan', client: 'invalid' }, test: helpers.assertError(errcode.invalidParam()) },
-		], cb)
+		const ws = yield helpers.createSocket()
+		yield helpers.request(ws, '/auth/login', { userID: 'ruan', client: 'invalid' }, helpers.assertError(errcode.invalidParam()))
 	})
 	
-	it('should fail to log out if not logged in', function(cb)
+	it('should fail to log out if not logged in', function*()
 	{
-		helpers.sequence([
-			{ path: '/auth/logout', test: helpers.assertError(errcode.authenticationRequired()) },
-		], cb)
+		const ws = yield helpers.createSocket()
+		yield helpers.request(ws, '/auth/logout', {}, helpers.assertError(errcode.authenticationRequired()))
 	})
 	
-	it('should deny an unauthenticated user access to an authenticated endpoint', function(cb)
+	it('should deny an unauthenticated user access to an authenticated endpoint', function*()
 	{
-		helpers.sequence([
-			{ path: '/system/info', test: helpers.assertError(errcode.authenticationRequired()) },
-		], cb)
+		const ws = yield helpers.createSocket()
+		yield helpers.request(ws, '/system/info', {}, helpers.assertError(errcode.authenticationRequired()))
 	})
 })
