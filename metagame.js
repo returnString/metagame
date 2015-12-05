@@ -15,6 +15,8 @@ const utils = require('./core/utils')
 const core = require('./core')
 const path = require('path')
 const UserMap = require('./core/usermap')
+const http = require('http')
+const https = require('https')
 
 core.require = modulePath => require(path.resolve(process.cwd(), modulePath))
 
@@ -39,12 +41,38 @@ class MetagameServer
 		const PlatformClass = yield platformClassCreator(core)
 		this.platform = new PlatformClass()
 		
-		this.webSocketServer = new WebSocketServer({
-			port: config.websocket.port
+		function processHttpRequest(req, res)
+		{
+			res.writeHead(426)
+			res.end('upgrade required for metagame websocket server')
+		}
+		
+		this.httpServer = http.createServer(processHttpRequest).listen(config.websocket.port)
+		
+		if (config.websocket.ssl.enabled)
+		{
+			this.httpsServer = https.createServer({
+				key: yield fs.readFileAsync(config.websocket.ssl.key),
+				cert: yield fs.readFileAsync(config.websocket.ssl.cert),
+			}, processHttpRequest).listen(config.websocket.ssl.port)
+		}
+		
+		const webSocketServer = new WebSocketServer({
+			server: this.httpServer,
 		})
 		
-		this.httpServer = this.webSocketServer._server
-		const router = new Router(this.webSocketServer)
+		const socketServers = [ webSocketServer ]
+		
+		if (this.httpsServer)
+		{
+			const secureWebSocketServer = new WebSocketServer({
+				server: this.httpsServer,
+			})
+			
+			socketServers.push(secureWebSocketServer)
+		}
+
+		const router = new Router(socketServers)
 		
 		const servicesDir = './services/'
 		const files = yield fs.readdirAsync(servicesDir)
@@ -108,12 +136,27 @@ class MetagameServer
 	
 	close()
 	{
-		this.webSocketServer.close()
+		this.httpServer.close()
+		
+		if (this.httpsServer)
+		{
+			this.httpsServer.close()
+		}
 	}
 	
-	get address()
+	get insecureAddress()
 	{
 		return this.httpServer.address()
+	}
+	
+	get secureAddress()
+	{
+		if (!this.httpsServer)
+		{
+			throw new Error('No secure server available')
+		}
+		
+		return this.httpsServer.address()
 	}
 }
 
@@ -123,9 +166,9 @@ if (module.parent)
 }
 else
 {
+	const server = new MetagameServer()
 	co(function*()
 	{
-		const server = new MetagameServer()
 		yield server.init()
-	}).catch(err => { throw err })
+	}).catch(err => { server.log.error(err) })
 }

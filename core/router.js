@@ -7,10 +7,10 @@ const utils = require('./utils')
 
 class Router
 {
-	constructor(socketServer)
+	constructor(socketServers)
 	{
 		this.routes = new Map()
-		this.socketServer = socketServer
+		this.socketServers = socketServers
 		this.log = log.create('router')
 	}
 	
@@ -51,10 +51,13 @@ class Router
 	
 	start()
 	{
-		this.socketServer.on('connection', socket =>
+		for (const socketServer of this.socketServers)
 		{
-			socket.on('message', message => this.onMessage(socket, message))
-		})
+			socketServer.on('connection', socket =>
+			{
+				socket.on('message', message => this.onMessage(socket, message))
+			})
+		}
 	}
 	
 	respond(socket, data, correlation, timeTaken)

@@ -7,6 +7,12 @@ module.exports = {
 	sandbox: 'default',
 	websocket: {
 		port: 1337,
+		ssl: {
+			enabled: true,
+			port: 1338,
+			cert: 'keys/metagame_cert.pem',
+			key: 'keys/metagame_key.pem',
+		},
 	},
 	clustering: {
 		// enables multiple worker processes for cpu-bound loads

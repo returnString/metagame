@@ -13,7 +13,7 @@ let currentServer
 
 function* createSocket()
 {
-	const ws = new WebSocket('ws://localhost:' + currentServer.address.port)
+	const ws = new WebSocket('wss://localhost:' + currentServer.secureAddress.port, { rejectUnauthorized: false })
 	return new Promise(resolve =>
 	{
 		ws.on('open', () =>
