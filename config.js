@@ -26,6 +26,8 @@ module.exports = {
 			port: 27017,
 		},
 	},
+	redis: {
+	},
 	state: {
 		data: 'test/sample_data/',
 		// the maximum number of retries for optimistic locking on state changes

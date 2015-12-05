@@ -18,7 +18,7 @@ const UserMap = require('./core/usermap')
 
 core.require = modulePath => require(path.resolve(process.cwd(), modulePath))
 
-const promisify = [ 'fs', 'mongodb' ]
+const promisify = [ 'fs', 'mongodb', 'redis' ]
 for (const moduleName of promisify)
 {
 	const module = require(moduleName)

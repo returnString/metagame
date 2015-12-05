@@ -4,6 +4,7 @@ const errcode = require('./errcode')
 const config = require('../config')
 const util = require('util')
 const mongodb = require('mongodb')
+const redis = require('redis')
 
 class Service
 {
@@ -34,6 +35,19 @@ class Service
 		const database = util.format('%s_%s_%s', config.sandbox, this.platform.name, connectionProfile.database || connectionName)
 		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
 		return yield mongodb.MongoClient.connectAsync(connString)
+	}
+	
+	*createRedisConnection(connectionName)
+	{
+		const connectionProfile = config.redis[connectionName]
+		if (!connectionProfile)
+		{
+			throw new Error('Invalid connection profile: ' + connectionName)
+		}
+		
+		const client = redis.createClient(connectionProfile.port, connectionProfile.host)
+		yield client.onceAsync('connect')
+		return client
 	}
 }
 
