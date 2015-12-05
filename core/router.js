@@ -2,16 +2,15 @@
 
 const errcode = require('../core/errcode')
 const co = require('co')
-const log = require('./log')
 const utils = require('./utils')
 
 class Router
 {
-	constructor(socketServers)
+	constructor(log, socketServers)
 	{
 		this.routes = new Map()
 		this.socketServers = socketServers
-		this.log = log.create('router')
+		this.log = log
 	}
 	
 	addRoute(path, handler, middleware)

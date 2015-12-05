@@ -1,7 +1,6 @@
 'use strict'
 
 const errcode = require('./errcode')
-const config = require('../config')
 const util = require('util')
 const mongodb = require('mongodb')
 const redis = require('redis')
@@ -10,6 +9,7 @@ class Service
 {
 	constructor(options)
 	{
+		this.config = options.config
 		this.log = options.log
 		this.platform = options.platform
 		this.userMap = options.userMap
@@ -26,20 +26,20 @@ class Service
 	
 	*createMongoConnection(connectionName)
 	{
-		const connectionProfile = config.mongodb[connectionName]
+		const connectionProfile = this.config.mongodb[connectionName]
 		if (!connectionProfile)
 		{
 			throw new Error('Invalid connection profile: ' + connectionName)
 		}
 		
-		const database = util.format('%s_%s_%s', config.sandbox, this.platform.name, connectionProfile.database || connectionName)
+		const database = util.format('%s_%s_%s', this.config.sandbox, this.platform.name, connectionProfile.database || connectionName)
 		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
 		return yield mongodb.MongoClient.connectAsync(connString)
 	}
 	
 	*createRedisConnection(connectionName)
 	{
-		const connectionProfile = config.redis[connectionName]
+		const connectionProfile = this.config.redis[connectionName]
 		if (!connectionProfile)
 		{
 			throw new Error('Invalid connection profile: ' + connectionName)

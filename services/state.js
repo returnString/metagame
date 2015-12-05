@@ -2,7 +2,6 @@
 
 module.exports = function*(core)
 {
-	const config = core.config
 	const errcode = core.errcode
 	
 	class StateService extends core.Service
@@ -12,7 +11,7 @@ module.exports = function*(core)
 		*init()
 		{
 			this.db = yield this.createMongoConnection('state')
-			this.dataConfig = core.require(config.state.data)
+			this.dataConfig = core.require(this.config.state.data)
 		}
 		
 		*getCollectionAndConfig(req)
@@ -90,7 +89,7 @@ module.exports = function*(core)
 				changeRequests.push({ change, params: changeRequest.params })
 			}
 			
-			for (let attempt = 0; attempt < config.state.maxRetries; attempt++)
+			for (let attempt = 0; attempt < this.config.state.maxRetries; attempt++)
 			{
 				let instance = yield req.collection.findOneAsync({ _id: req.params.id })
 				if (!instance)

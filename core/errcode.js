@@ -1,6 +1,6 @@
 'use strict'
 
-const config = require('../config')
+let debug
 
 const errorCodes = {
 	internalError: 1,
@@ -30,7 +30,7 @@ class MetagameError
 		this.name = name
 		this.data = data
 		
-		if (config.debug)
+		if (debug)
 		{
 			this.stack = new Error().stack
 		}
@@ -38,3 +38,7 @@ class MetagameError
 }
 
 exports.MetagameError = MetagameError
+exports.init = function(config)
+{
+	debug = config.debug
+}

@@ -2,7 +2,6 @@
 
 const ws = require('ws')
 const WebSocketServer = ws.Server
-const config = require('./config')
 const bluebird = require('bluebird')
 const fs = require('fs')
 const Router = require('./core/router')
@@ -10,13 +9,13 @@ const errcode = require('./core/errcode')
 const co = require('co')
 const cluster = require('cluster')
 const os = require('os')
-const log = require('./core/log')
 const utils = require('./core/utils')
 const core = require('./core')
 const path = require('path')
 const UserMap = require('./core/usermap')
 const http = require('http')
 const https = require('https')
+const bunyan = require('bunyan')
 
 core.require = modulePath => require(path.resolve(process.cwd(), modulePath))
 
@@ -29,15 +28,24 @@ for (const moduleName of promisify)
 
 class MetagameServer
 {
-	constructor()
+	constructor(config)
 	{
-		this.log = log.create('server')
+		errcode.init(config)
+		this.config = config
+		this.log = this.createLogger('server')
 		this.userMap = new UserMap()
+	}
+	
+	createLogger(name)
+	{
+		const logger = bunyan.createLogger({ name, workerID: utils.getWorkerID(), platform: this.config.platform })
+		logger.level(this.config.logging.verbosity)
+		return logger
 	}
 	
 	*initWorker()
 	{
-		const platformClassCreator = core.require(config.platform)
+		const platformClassCreator = core.require(this.config.platform)
 		const PlatformClass = yield platformClassCreator(core)
 		this.platform = new PlatformClass()
 		
@@ -47,14 +55,14 @@ class MetagameServer
 			res.end('upgrade required for metagame websocket server')
 		}
 		
-		this.httpServer = http.createServer(processHttpRequest).listen(config.websocket.port)
+		this.httpServer = http.createServer(processHttpRequest).listen(this.config.websocket.port)
 		
-		if (config.websocket.ssl.enabled)
+		if (this.config.websocket.ssl.enabled)
 		{
 			this.httpsServer = https.createServer({
-				key: yield fs.readFileAsync(config.websocket.ssl.key),
-				cert: yield fs.readFileAsync(config.websocket.ssl.cert),
-			}, processHttpRequest).listen(config.websocket.ssl.port)
+				key: yield fs.readFileAsync(this.config.websocket.ssl.key),
+				cert: yield fs.readFileAsync(this.config.websocket.ssl.cert),
+			}, processHttpRequest).listen(this.config.websocket.ssl.port)
 		}
 		
 		const webSocketServer = new WebSocketServer({
@@ -72,7 +80,7 @@ class MetagameServer
 			socketServers.push(secureWebSocketServer)
 		}
 
-		const router = new Router(socketServers)
+		const router = new Router(this.createLogger('router'), socketServers)
 		
 		const servicesDir = './services/'
 		const files = yield fs.readdirAsync(servicesDir)
@@ -81,12 +89,12 @@ class MetagameServer
 			const serviceName = file.split('.')[0]
 			const serviceClassCreator = require(servicesDir + serviceName)
 			const ServiceClass = yield serviceClassCreator(core)
-			const serviceLogger = log.create(serviceName)
 			const service = new ServiceClass({
-				log: serviceLogger,
+				log: this.createLogger(serviceName),
 				platform: this.platform,
 				router,
 				userMap: this.userMap,
+				config: this.config,
 			})
 			
 			if (service.init)
@@ -114,10 +122,10 @@ class MetagameServer
 	
 	*init()
 	{
-		if (cluster.isMaster && config.clustering.enabled)
+		if (cluster.isMaster && this.config.clustering.enabled)
 		{
 			const coreCount = os.cpus().length
-			const workerCount = coreCount * config.clustering.workersPerCore
+			const workerCount = coreCount * this.config.clustering.workersPerCore
 			this.log.info({ 
 				coreCount,
 				workerCount
@@ -125,7 +133,7 @@ class MetagameServer
 			
 			for (let i = 0; i < workerCount; i++)
 			{
-				cluster.fork({ version: config.version })
+				cluster.fork()
 			}
 		}
 		else
@@ -166,9 +174,16 @@ if (module.parent)
 }
 else
 {
-	const server = new MetagameServer()
 	co(function*()
 	{
+		const configPath = process.argv[2]
+		if (!configPath)
+		{
+			throw new Error('Must specify a config path')
+		}
+		
+		const config = yield core.require(configPath)
+		const server = new MetagameServer(config)
 		yield server.init()
-	}).catch(err => { server.log.error(err) })
+	}).catch(err => { console.error(err.stack) })
 }

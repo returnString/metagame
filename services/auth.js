@@ -2,7 +2,6 @@
 
 module.exports = function*(core)
 {
-	const config = core.config
 	const errcode = core.errcode
 	
 	class AuthService extends core.Service
@@ -11,7 +10,7 @@ module.exports = function*(core)
 		
 		*init()
 		{
-			this.validClients = new Set(config.users.allowedClients)
+			this.validClients = new Set(this.config.users.allowedClients)
 		}
 		
 		getRoutes()

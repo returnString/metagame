@@ -2,7 +2,6 @@
 
 const WebSocket = require('ws')
 const MetagameServer = require('../metagame')
-const config = require('../config')
 const uuid = require('node-uuid')
 const assert = require('assert')
 const mongodb = require('mongodb')
@@ -30,12 +29,13 @@ function* boot()
 		currentServer.close()
 	}
 	
+	const config = require('../config_example')
 	config.websocket.port = 0
 	config.sandbox = 'tests'
 	config.clustering.enabled = false
 	config.logging.verbosity = 'error'
 	
-	currentServer = new MetagameServer()
+	currentServer = new MetagameServer(config)
 	yield currentServer.init()
 	
 	for (const prop in config.mongodb)

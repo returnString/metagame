@@ -14,12 +14,11 @@
   },
   "devDependencies": {
     "mocha": "^2.3.3",
-    "mocha-generators": "^1.2.0",
-    "nodemon": "^1.8.1"
+    "mocha-generators": "^1.2.0"
   },
   "scripts": {
     "test": "mocha",
-    "start": "nodemon | bunyan"
+    "start": "node metagame config_example | bunyan"
   },
   "author": "Ruan Pearce-Authers",
   "license": "MIT"
