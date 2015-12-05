@@ -102,9 +102,11 @@ module.exports = function*(loader)
 		{
 			// this is what the client will see; the whole response will look something like:
 			// { data: { result: <x> } }
-			return { result: request.lhs + request.rhs }
+			return { result: request.params.lhs + request.params.rhs }
 		}
 	}
+	
+	return CalculatorService
 }
 ```
 
