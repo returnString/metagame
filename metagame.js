@@ -4,19 +4,22 @@ const ws = require('ws')
 const WebSocketServer = ws.Server
 const bluebird = require('bluebird')
 const fs = require('fs')
-const Router = require('./core/router')
 const co = require('co')
 const cluster = require('cluster')
 const os = require('os')
-const utils = require('./core/utils')
-const core = require('./core')
 const path = require('path')
-const UserMap = require('./core/usermap')
 const http = require('http')
 const https = require('https')
 const bunyan = require('bunyan')
+const Router = require('./core/router')
+const utils = require('./core/utils')
+const UserMap = require('./core/usermap')
 
-core.require = modulePath => require(path.resolve(process.cwd(), modulePath))
+const loader = {
+	require: modulePath => require(path.resolve(process.cwd(), modulePath)),
+	Platform: require('./core/platform'),
+	Service: require('./core/service'),
+}
 
 const promisify = [ 'fs', 'mongodb', 'redis' ]
 for (const moduleName of promisify)
@@ -43,8 +46,8 @@ class MetagameServer
 	
 	*initWorker()
 	{
-		const platformClassCreator = core.require(this.config.platform)
-		const PlatformClass = yield platformClassCreator(core)
+		const platformClassCreator = loader.require(this.config.platform)
+		const PlatformClass = yield platformClassCreator(loader)
 		this.platform = new PlatformClass()
 		
 		function processHttpRequest(req, res)
@@ -82,8 +85,8 @@ class MetagameServer
 		
 		for (const serviceFile of this.config.services)
 		{
-			const serviceClassCreator = core.require(serviceFile)
-			const ServiceClass = yield serviceClassCreator(core)
+			const serviceClassCreator = loader.require(serviceFile)
+			const ServiceClass = yield serviceClassCreator(loader)
 			const service = new ServiceClass({
 				platform: this.platform,
 				userMap: this.userMap,
@@ -175,7 +178,7 @@ else
 			throw new Error('Must specify a config path')
 		}
 		
-		const config = yield core.require(configPath)
+		const config = yield loader.require(configPath)
 		const server = new MetagameServer(config)
 		yield server.init()
 	}).catch(err => { console.error(err.stack) })

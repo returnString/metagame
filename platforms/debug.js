@@ -1,8 +1,8 @@
 'use strict'
 
-module.exports = function*(core)
+module.exports = function*(loader)
 {
-	class DebugPlatform extends core.Platform
+	class DebugPlatform extends loader.Platform
 	{
 		get name() { return 'debug' }
 		

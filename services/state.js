@@ -1,8 +1,8 @@
 'use strict'
 
-module.exports = function*(core)
+module.exports = function*(loader)
 {
-	class StateService extends core.Service
+	class StateService extends loader.Service
 	{
 		get name() { return 'state' }
 		get serviceErrors() { return [
@@ -17,7 +17,7 @@ module.exports = function*(core)
 		*init()
 		{
 			this.db = yield this.createMongoConnection('state')
-			this.dataConfig = core.require(this.config.state.data)
+			this.dataConfig = loader.require(this.config.state.data)
 		}
 		
 		*getCollectionAndConfig(req)

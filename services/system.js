@@ -1,8 +1,8 @@
 'use strict'
 
-module.exports = function*(core)
+module.exports = function*(loader)
 {
-	class SystemService extends core.Service
+	class SystemService extends loader.Service
 	{
 		get name() { return 'system' }
 		
