@@ -2,11 +2,17 @@
 
 module.exports = function*(core)
 {
-	const errcode = core.errcode
-	
 	class StateService extends core.Service
 	{
 		get name() { return 'state' }
+		get serviceErrors() { return [
+			'instanceNotFound',
+			'collectionNotFound',
+			'changeNotFound',
+			'changeDenied',
+			'changeFailed',
+			'changeContention',
+		]}
 		
 		*init()
 		{
@@ -20,7 +26,7 @@ module.exports = function*(core)
 			const collectionConfig = this.dataConfig.collections[name]
 			if (!collectionConfig)
 			{
-				return errcode.collectionNotFound(name)
+				return this.errors.collectionNotFound(name)
 			}
 			
 			req.collection = yield this.db.collectionAsync(name)
@@ -55,7 +61,7 @@ module.exports = function*(core)
 			const result = yield req.collection.findOneAsync({ _id: req.params.id })
 			if (!result)
 			{
-				return errcode.instanceNotFound()
+				return this.errors.instanceNotFound()
 			}
 			
 			return result
@@ -65,7 +71,7 @@ module.exports = function*(core)
 		{
 			if (!(req.params.changes instanceof Array))
 			{
-				return errcode.messageParsingFailed()
+				return this.errors.messageParsingFailed()
 			}
 			
 			const changeRequests = []
@@ -74,7 +80,7 @@ module.exports = function*(core)
 				const change = req.collectionConfig.changes[changeRequest.name]
 				if (!change)
 				{
-					return errcode.changeNotFound()
+					return this.errors.changeNotFound()
 				}
 				
 				if (change.test)
@@ -82,7 +88,7 @@ module.exports = function*(core)
 					const testResult = yield change.test(req.user, req.params.id)
 					if (!testResult)
 					{
-						return errcode.changeDenied()
+						return this.errors.changeDenied()
 					}
 				}
 				
@@ -109,12 +115,12 @@ module.exports = function*(core)
 					catch (err)
 					{
 						this.log.error(err, 'change application error')
-						return errcode.internalError()
+						return this.errors.internalError()
 					}
 					
 					if (changeResult !== undefined)
 					{
-						return errcode.changeFailed({ changeResult })
+						return this.errors.changeFailed({ changeResult })
 					}
 				}
 				
@@ -135,7 +141,7 @@ module.exports = function*(core)
 						}
 						else
 						{
-							return errcode.internalError()
+							return this.errors.internalError()
 						}
 					}
 				}
@@ -151,7 +157,7 @@ module.exports = function*(core)
 				return { instance }
 			}
 			
-			return errcode.changeContention()
+			return this.errors.changeContention()
 		}
 	}
 	

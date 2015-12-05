@@ -3,7 +3,6 @@
 require('./setup')()
 const assert = require('assert')
 const helpers = require('./helpers')
-const errcode = require('../core/errcode')
 const sample = require('./sample_data')
 
 describe('state', function()
@@ -21,7 +20,7 @@ describe('state', function()
 		it('should return an error for a collection that does not exist', function*()
 		{
 			const ws = yield helpers.createAuthedSocket()
-			yield helpers.request(ws, '/state/collection', { collection: 'doesntexist' }, helpers.assertError(errcode.collectionNotFound()))
+			yield helpers.request(ws, '/state/collection', { collection: 'doesntexist' }, helpers.assertError('state/collectionNotFound'))
 		})
 		
 		it('should include advertised info for collections', function*()
@@ -94,27 +93,27 @@ describe('state', function()
 		it('should return an error for an instance that does not exist', function*()
 		{
 			const ws = yield helpers.createAuthedSocket()
-			yield helpers.request(ws, '/state/instance', { collection: 'users', id: 'doesntexist' }, helpers.assertError(errcode.instanceNotFound()))
+			yield helpers.request(ws, '/state/instance', { collection: 'users', id: 'doesntexist' }, helpers.assertError('state/instanceNotFound'))
 		})
 		
 		it('should reject a request to modify an instance which triggers a game-defined error', function*()
 		{
 			const ws = yield helpers.createAuthedSocket()
-			yield modify(ws, { changes: buyItemRequest('doesntexist') }, helpers.assertError(errcode.changeFailed()))
+			yield modify(ws, { changes: buyItemRequest('doesntexist') }, helpers.assertError('state/changeFailed'))
 			yield modify(ws, { changes: setCurrencyRequest(0) }, res => assert.strictEqual(res.data.instance.currency, 0))
-			yield modify(ws, { changes: buyItemRequest('cheapItem') }, helpers.assertError(errcode.changeFailed()))
+			yield modify(ws, { changes: buyItemRequest('cheapItem') }, helpers.assertError('state/changeFailed'))
 		})
 		
 		it('should reject a request to modify an instance without the correct privileges', function*()
 		{
 			const ws = yield helpers.createAuthedSocket()
-			yield modify(ws, { changes: grantCurrencyChanges }, helpers.assertError(errcode.changeDenied()))
+			yield modify(ws, { changes: grantCurrencyChanges }, helpers.assertError('state/changeDenied'))
 		})
 		
 		it('should reject a request to modify an instance without the correct ID-based privilege', function*()
 		{
 			const ws = yield helpers.createAuthedSocket()
-			yield modify(ws, { changes: buyItemRequest('cheapItem'), id: 'notme' }, helpers.assertError(errcode.changeDenied()))
+			yield modify(ws, { changes: buyItemRequest('cheapItem'), id: 'notme' }, helpers.assertError('state/changeDenied'))
 		})
 		
 		it('should reject a request to modify an instance with a malformed change list', function*()
@@ -122,7 +121,7 @@ describe('state', function()
 			const ws = yield helpers.createAuthedSocket()
 			function* invalidRequest(changes)
 			{
-				yield modify(ws, { changes }, helpers.assertError(errcode.messageParsingFailed()))
+				yield modify(ws, { changes }, helpers.assertError('core/messageParsingFailed'))
 			}
 			
 			yield invalidRequest(1)

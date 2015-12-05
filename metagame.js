@@ -5,7 +5,6 @@ const WebSocketServer = ws.Server
 const bluebird = require('bluebird')
 const fs = require('fs')
 const Router = require('./core/router')
-const errcode = require('./core/errcode')
 const co = require('co')
 const cluster = require('cluster')
 const os = require('os')
@@ -30,7 +29,6 @@ class MetagameServer
 {
 	constructor(config)
 	{
-		errcode.init(config)
 		this.config = config
 		this.log = this.createLogger('server')
 		this.userMap = new UserMap()
@@ -80,7 +78,7 @@ class MetagameServer
 			socketServers.push(secureWebSocketServer)
 		}
 
-		const router = new Router(this.createLogger('router'), socketServers)
+		const router = new Router(this.createLogger('router'), socketServers, this.config)
 		
 		const servicesDir = './services/'
 		const files = yield fs.readdirAsync(servicesDir)

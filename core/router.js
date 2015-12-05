@@ -1,16 +1,21 @@
 'use strict'
 
-const errcode = require('../core/errcode')
 const co = require('co')
 const utils = require('./utils')
+const error = require('./error')
+const MetagameError = error.MetagameError
+const ErrorContainer = error.ErrorContainer
 
 class Router
 {
-	constructor(log, socketServers)
+	constructor(log, socketServers, config)
 	{
 		this.routes = new Map()
 		this.socketServers = socketServers
 		this.log = log
+		this.errors = new ErrorContainer('router', config)
+		this.errors.register('notFound')
+		this.errors.register('internalError')
 	}
 	
 	addRoute(path, handler, middleware)
@@ -28,7 +33,7 @@ class Router
 		const route = this.routes.get(path)
 		if (!route)
 		{
-			return errcode.routeNotFound(path)
+			return this.errors.notFound(path)
 		}
 		
 		let request = { params, socket }
@@ -61,7 +66,7 @@ class Router
 	
 	respond(socket, data, correlation, timeTaken)
 	{
-		const dataSlot = data instanceof errcode.MetagameError ? 'error' : 'data'
+		const dataSlot = data instanceof MetagameError ? 'error' : 'data'
 		const response = {
 			[dataSlot]: data,
 			workerID: utils.getWorkerID(),
@@ -83,7 +88,7 @@ class Router
 		}
 		catch (err)
 		{
-			this.respond(socket, errcode.messageParsingFailed())
+			this.respond(socket, this.errors.messageParsingFailed())
 			return
 		}
 		
@@ -101,7 +106,7 @@ class Router
 			catch (err)
 			{
 				self.log.error(err)
-				data = errcode.internalError()
+				data = this.errors.internalError()
 			}
 			
 			const timeTaken = Date.now() - receivedAt

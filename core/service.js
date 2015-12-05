@@ -1,9 +1,9 @@
 'use strict'
 
-const errcode = require('./errcode')
 const util = require('util')
 const mongodb = require('mongodb')
 const redis = require('redis')
+const ErrorContainer = require('./error').ErrorContainer
 
 class Service
 {
@@ -13,6 +13,14 @@ class Service
 		this.log = options.log
 		this.platform = options.platform
 		this.userMap = options.userMap
+		this.errors = new ErrorContainer(this.name, this.config)
+		if (this.serviceErrors)
+		{
+			for (const error of this.serviceErrors)
+			{
+				this.errors.register(error)
+			}
+		}
 	}
 	
 	*authenticated(request)
@@ -20,7 +28,7 @@ class Service
 		request.user = this.userMap.usersBySocket.get(request.socket)
 		if (!request.user)
 		{
-			return errcode.authenticationRequired()
+			return this.errors.authenticationRequired()
 		}
 	}
 	

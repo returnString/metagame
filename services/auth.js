@@ -2,8 +2,6 @@
 
 module.exports = function*(core)
 {
-	const errcode = core.errcode
-	
 	class AuthService extends core.Service
 	{
 		get name() { return 'auth' }
@@ -26,7 +24,7 @@ module.exports = function*(core)
 			const authData = yield this.platform.authenticate(req)
 			if (!this.validClients.has(req.params.client))
 			{
-				return errcode.invalidParam('client')
+				return this.errors.invalidParam('client')
 			}
 			
 			this.userMap.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client)

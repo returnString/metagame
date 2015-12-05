@@ -48,13 +48,12 @@ function* boot()
 	}
 }
 
-function assertError(error)
+function assertError(name)
 {
 	return res =>
 	{
 		assert.notEqual(res.error, null, 'Expected an error, got ' + JSON.stringify(res.data))
-		assert.strictEqual(res.error.name, error.name)
-		assert.strictEqual(res.error.code, error.code)
+		assert.strictEqual(res.error.name, name)
 	}
 }
 
