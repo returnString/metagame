@@ -80,17 +80,12 @@ class MetagameServer
 
 		const router = new Router(this.createLogger('router'), socketServers, this.config)
 		
-		const servicesDir = './services/'
-		const files = yield fs.readdirAsync(servicesDir)
-		for (const file of files)
+		for (const serviceFile of this.config.services)
 		{
-			const serviceName = file.split('.')[0]
-			const serviceClassCreator = require(servicesDir + serviceName)
+			const serviceClassCreator = core.require(serviceFile)
 			const ServiceClass = yield serviceClassCreator(core)
 			const service = new ServiceClass({
-				log: this.createLogger(serviceName),
 				platform: this.platform,
-				router,
 				userMap: this.userMap,
 				config: this.config,
 			})

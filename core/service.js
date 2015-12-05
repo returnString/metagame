@@ -10,7 +10,6 @@ class Service
 	constructor(options)
 	{
 		this.config = options.config
-		this.log = options.log
 		this.platform = options.platform
 		this.userMap = options.userMap
 		this.errors = new ErrorContainer(this.name, this.config)

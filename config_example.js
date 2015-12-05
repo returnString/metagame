@@ -14,6 +14,11 @@ module.exports = {
 			key: 'keys/metagame_key.pem',
 		},
 	},
+	services: [
+		'services/auth',
+		'services/state',
+		'services/system',
+	],
 	clustering: {
 		// enables multiple worker processes for cpu-bound loads
 		enabled: true,
