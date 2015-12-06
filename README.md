@@ -6,7 +6,7 @@ Extensible online game backend. Moderately modern with ES6. Highly WIP.
 [![Build Status](https://travis-ci.org/returnString/metagame.svg?branch=master)](https://travis-ci.org/returnString/metagame)
 
 ## Windows
-[![Build status](https://ci.appveyor.com/api/projects/status/9cknkest4bohfawd?svg=true)](https://ci.appveyor.com/project/returnString/metagame)
+[![Build status](https://ci.appveyor.com/api/projects/status/9cknkest4bohfawd/branch/master?svg=true)](https://ci.appveyor.com/project/returnString/metagame/branch/master)
 
 # Short version
 metagame will take care of your...
