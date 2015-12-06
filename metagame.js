@@ -33,23 +33,26 @@ class MetagameServer
 	constructor(config)
 	{
 		this.config = config
-		this.log = this.createLogger('server')
 		this.userMap = new UserMap()
 	}
 	
 	createLogger(name)
 	{
-		const logger = bunyan.createLogger({ name, workerID: utils.getWorkerID(), platform: this.config.platform })
+		const logger = bunyan.createLogger({ name, workerID: utils.getWorkerID(), platform: utils.detectName(this.platform, 'platform') })
 		logger.level(this.config.logging.verbosity)
 		return logger
 	}
 	
-	*initWorker()
+	*initPlatform()
 	{
 		const platformClassCreator = loader.require(this.config.platform)
 		const PlatformClass = yield platformClassCreator(loader)
 		this.platform = new PlatformClass()
-		
+		this.log = this.createLogger('server')
+	}
+	
+	*initWorker()
+	{
 		function processHttpRequest(req, res)
 		{
 			res.writeHead(426)
@@ -101,7 +104,7 @@ class MetagameServer
 			const routes = service.getRoutes()
 			for (const route of routes)
 			{
-				const path = '/' + service.getName() + '/' + route[0]
+				const path = '/' + utils.detectName(service, 'service') + '/' + route[0]
 				const handler = route[1].bind(service)
 				let middleware = route[2]
 				if (middleware)
@@ -118,6 +121,8 @@ class MetagameServer
 	
 	*init()
 	{
+		yield this.initPlatform()
+	
 		if (cluster.isMaster && this.config.clustering.enabled)
 		{
 			const coreCount = os.cpus().length

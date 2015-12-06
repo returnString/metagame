@@ -4,6 +4,7 @@ const util = require('util')
 const mongodb = require('mongodb')
 const redis = require('redis')
 const ErrorContainer = require('./error').ErrorContainer
+const utils = require('./utils')
 
 class Service
 {
@@ -12,32 +13,13 @@ class Service
 		this.config = options.config
 		this.platform = options.platform
 		this.userMap = options.userMap
-		this.errors = new ErrorContainer(this.getName(), this.config)
+		this.errors = new ErrorContainer(utils.detectName(this, 'service'), this.config)
 		if (this.serviceErrors)
 		{
 			for (const error of this.serviceErrors)
 			{
 				this.errors.register(error)
 			}
-		}
-	}
-	
-	getName()
-	{
-		const autoNameSearch = 'service'
-		const lowerCaseCtor = this.constructor.name.toLowerCase()
-		
-		if (this.name)
-		{
-			return this.name
-		}
-		else if (lowerCaseCtor.endsWith(autoNameSearch))
-		{
-			return lowerCaseCtor.substring(0, lowerCaseCtor.length - autoNameSearch.length)
-		}
-		else
-		{
-			return lowerCaseCtor
 		}
 	}
 	
