@@ -2,12 +2,6 @@
 
 Extensible online game backend. Moderately modern with ES6. Highly WIP.
 
-## Linux
-[![Build Status](https://travis-ci.org/returnString/metagame.svg?branch=master)](https://travis-ci.org/returnString/metagame)
-
-## Windows
-[![Build status](https://ci.appveyor.com/api/projects/status/9cknkest4bohfawd/branch/master?svg=true)](https://ci.appveyor.com/project/returnString/metagame/branch/master)
-
 # Short version
 metagame will take care of your...
 - user profiles and inventories
@@ -34,6 +28,14 @@ It also includes SSL support if you don't feel like setting up SSL termination.
 See the [issue tracker](https://github.com/returnString/metagame/labels/feature).
 
 # Installation
+
+## Linux build status
+[![Build Status](https://travis-ci.org/returnString/metagame.svg?branch=master)](https://travis-ci.org/returnString/metagame)
+
+## Windows build status
+[![Build status](https://ci.appveyor.com/api/projects/status/9cknkest4bohfawd/branch/master?svg=true)](https://ci.appveyor.com/project/returnString/metagame/branch/master)
+
+
 Officially, the following Node versions are tested on Linux and Windows:
 - 4.2 (LTS)
 - 5.0
