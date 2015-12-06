@@ -30,9 +30,8 @@ These changes are written as normal Javascript functions that are applied atomic
 They support restrictions on who can apply them, failure cases (eg 'not enough money' for a shop purchase state change)
 and can be used to model anything from secure player inventories to world state.
 
-## Wishlist
-- Telemetry service: build up full match records, report important events, etc
-- Atomic cross-instance state changes (eg trading between players)
+## Planned features
+See the [issue tracker](https://github.com/returnString/metagame/labels/feature).
 
 # Dependencies
 - mongodb
@@ -43,7 +42,8 @@ and can be used to model anything from secure player inventories to world state.
 ## Services
 This is a simple example of a loading a calculator service that adds two numbers together on request.
 
-To load a new service, just add its file path to your config file, in the services section:
+To load a new service, just add its file path to your config file, in the services section.
+Paths can be absolute, or relative to metagame's working dir.
 ```javascript
 module.exports = {
 	...
@@ -72,8 +72,15 @@ module.exports = function*(loader)
 		// good for creating DB connections, loading files into memory etc
 		*init()
 		{
+			// services have some DB helpers included
+			// they load connection params from the specified name in the 'redis' and 'mongo' config sections
+			this.mongo = yield this.createMongoConnection('calculator')
+			this.redis = yield this.createRedisConnection('calculator')
 		}
 		
+		// this is a middleware function; it gets executed *before* the route itself
+		// if a middleware function returns something, then we stop and send that data to the client
+		// if a middleware function returns nothing, the request carries on as normal
 		*requireLeftAndRight(request)
 		{
 			if (!request.params.lhs || !request.params.rhs)
@@ -86,11 +93,12 @@ module.exports = function*(loader)
 		
 		// tell the metagame router what commands to expose
 		// each route is an array consisting of the name, function to call and any middleware to call before it
+		// middleware are called in the order they're defined here
 		getRoutes()
 		{
 			return [
 				// this command will be exposed as '/calculator/add'
-				// with the two middleware functions, it will reject unauthenticated users and requests that don't contain lhs and rhs params
+				// it will reject unauthenticated users and requests that don't contain lhs and rhs params
 				[ 'add', this.add, [ this.authenticated, this.requireLeftAndRight ] ],	
 			]	
 		}
@@ -108,4 +116,36 @@ module.exports = function*(loader)
 ```
 
 ## Platforms
-// TODO
+Currently, platforms only serve to authenticate users.
+In the future, they'll include support for things like external entitlements, consumables etc.
+
+You can change the active platform for a metagame instance by modifying the `platform` config property:
+
+```javascript
+module.exports = {
+	...
+	platform: '/path/to/myplatform',
+	...
+```
+
+Here's the contents of myplatform.js, a custom platform class that queries a web service for user info based on a client token.
+```javascript
+module.exports = function*(loader)
+{
+	class MyPlatform extends loader.Platforms
+	{
+		*authenticate(req)
+		{
+			const userToken = req.params.token
+			const myUserData = yield doAnHttpRequest('https://myplatform.com/userinfo?token=' + userToken)
+			return {
+				id: myUserData.somePermanentID,
+				platformData: { displayName: myUserData.someTransientName },
+				privileges: [],
+			}
+		}
+	}
+	
+	return MyPlatform
+}
+```
