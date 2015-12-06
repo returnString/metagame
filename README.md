@@ -10,6 +10,13 @@ Officially, the following Node versions are tested on Linux:
 
 Unofficially, it's primarily developed on OSX, but CI doesn't cover that.
 
+# Short version
+metagame will take care of your...
+- user profiles and inventories
+- in-game shop
+- custom platform integration
+- annoying in-house PHP 'backend' from three projects ago
+
 # Current features
 ## Protocol
 metagame uses websockets with JSON messages for all communication.
@@ -29,6 +36,9 @@ The state service stores collections of objects, where each collection has a lis
 These changes are written as normal Javascript functions that are applied atomically to instances.
 They support restrictions on who can apply them, failure cases (eg 'not enough money' for a shop purchase state change)
 and can be used to model anything from secure player inventories to world state.
+
+Collections can also advertise general information; a user collection might want to advertise
+the list of available items to purchase, along with their prices.
 
 ## Planned features
 See the [issue tracker](https://github.com/returnString/metagame/labels/feature).
@@ -114,6 +124,8 @@ module.exports = function*(loader)
 	return CalculatorService
 }
 ```
+
+The stock services don't get any special treatment; anything you see in them can be done in your custom service!
 
 ## Platforms
 Currently, platforms only serve to authenticate users.
