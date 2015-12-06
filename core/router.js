@@ -88,6 +88,11 @@ class Router
 		}
 		catch (err)
 		{
+			// swallow parse errors
+		}
+		
+		if (!requestData || !requestData.path)
+		{
 			this.respond(socket, this.errors.messageParsingFailed())
 			return
 		}
