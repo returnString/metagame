@@ -21,6 +21,55 @@ metagame will take care of your...
 ## Protocol
 metagame uses websockets with JSON messages for all communication.
 
+Here's an example exchange where a client logs in and requests a state change:
+```json
+// client
+{
+	"path": "/auth/login",
+	"params": { "userID": "ruan", "client": "game" },
+	"correlation": "1f04d474-b0e0-46f7-ac99-fdd567533f43"
+}
+
+// server
+{
+	"data": { "ok": true },
+	"workerID": "master",
+	"timeTaken": 1,
+	"correlation": "1f04d474-b0e0-46f7-ac99-fdd567533f43"
+}
+
+// client
+{
+	"path": "/state/modify",
+	"params": {
+		"collection": "users",
+		"id": "ruan",
+		"changes": [
+			{
+				"name": "buyItem",
+				"params": { "item": "cheapItem" }
+			}
+		]
+	},
+	"correlation": "296b53d0-4540-4934-b9c3-9c330c946048"
+}
+
+// server
+{
+	"data": {
+		"_id": "ruan",
+		"currency": 200,
+		"items": [ "cheapItem" ],
+		"v": 3
+	},
+	"workerID": "master",
+	"timeTaken": 1,
+	"correlation": "296b53d0-4540-4934-b9c3-9c330c946048"
+}
+```
+
+The `correlation` parameter is optional in client requests, but allows you to use a request-response model.
+
 It also includes built-in SSL support, although more complex deployments
 with specialised app servers will probably want to use SSL termination.
 
