@@ -40,7 +40,7 @@ class Service
 			throw new Error('Invalid connection profile: ' + connectionName)
 		}
 		
-		const database = util.format('%s_%s_%s', this.config.sandbox, this.platform.name, connectionProfile.database || connectionName)
+		const database = util.format('%s_%s_%s', this.config.sandbox, utils.detectName(this.platform, 'platform'), connectionProfile.database || connectionName)
 		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
 		return yield mongodb.MongoClient.connectAsync(connString)
 	}

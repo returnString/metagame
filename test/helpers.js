@@ -7,6 +7,7 @@ const assert = require('assert')
 const mongodb = require('mongodb')
 const util = require('util')
 const co = require('co')
+const utils = require('../core/utils')
 
 let currentServer
 
@@ -41,7 +42,7 @@ function* boot()
 	for (const prop in config.mongodb)
 	{
 		const connectionProfile = config.mongodb[prop]
-		const database = util.format('%s_%s_%s', config.sandbox, currentServer.platform.name, connectionProfile.database || prop)
+		const database = util.format('%s_%s_%s', config.sandbox, utils.detectName(currentServer.platform, 'platform'), connectionProfile.database || prop)
 		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
 		const db = yield mongodb.MongoClient.connectAsync(connString)
 		yield db.dropDatabase()
@@ -89,7 +90,7 @@ function request(ws, path, params, tests)
 				}
 				
 				ws.removeListener('message', gotMessage)
-				resolve()
+				resolve(response)
 			}
 		})
 	})
