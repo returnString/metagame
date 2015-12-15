@@ -40,6 +40,7 @@ Officially, the following Node versions are tested on Linux and Windows:
 - 4.2 (LTS)
 - 5.0
 - 5.1
+- 5.2
 
 Unofficially, it's primarily developed on OSX, but CI doesn't cover that.
 
