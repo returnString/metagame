@@ -29,6 +29,7 @@ module.exports = {
 		'services/auth',
 		'services/state',
 		'services/system',
+		'services/telemetry',
 	],
 	clustering: {
 		// enables multiple worker processes for cpu-bound loads
@@ -47,6 +48,10 @@ module.exports = {
 	// these config sections can be referenced inside services to create mongodb connections
 	mongodb: {
 		state: {
+			host: '127.0.0.1',
+			port: 27017,
+		},
+		telemetry: {
 			host: '127.0.0.1',
 			port: 27017,
 		},
