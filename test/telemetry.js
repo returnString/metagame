@@ -35,7 +35,7 @@ describe('telemetry', function()
 			],
 		}
 		
-		yield helpers.request(ws, '/telemetry/record', request);
+		yield helpers.request(ws, '/telemetry/record', request)
 		const viewResponse = yield helpers.request(ws, '/telemetry/view', { sessionID })
 		const record = viewResponse.data.record
 		assert.deepEqual(record.testThing.exampleTimeline, timeline1)
