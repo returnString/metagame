@@ -11,6 +11,8 @@ module.exports = {
 	websocket: {
 		// port for ws:// connections
 		port: 1337,
+		// set this to true if you want to trust x-forwarded-for headers for client IP addresses
+		proxied: false,
 		ssl: {
 			// if enabled, metagame will also accept secure connections
 			// you should use this if *anything* is sent over a public network
@@ -44,6 +46,9 @@ module.exports = {
 	users: {
 		// the allowed client types for authentication
 		allowedClients: [ 'game', 'companion' ],
+	},
+	geolocation: {
+		enabled: true,
 	},
 	// these config sections can be referenced inside services to create mongodb connections
 	mongodb: {

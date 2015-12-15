@@ -33,7 +33,7 @@ class MetagameServer
 	constructor(config)
 	{
 		this.config = config
-		this.userMap = new UserMap()
+		this.userMap = new UserMap(config)
 	}
 	
 	createLogger(name)
