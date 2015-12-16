@@ -58,7 +58,7 @@ module.exports = function*(loader)
 		
 		*record(req)
 		{
-			if (!Array.isArray(req.params.timelines))
+			if (!Array.isArray(req.params.timelines) || req.params.timelines.length === 0)
 			{
 				return this.errors.messageParsingFailed('timelines')
 			}
@@ -71,8 +71,15 @@ module.exports = function*(loader)
 				update[objectName + '.' + timelineName] = { $each: timeline.entries }
 			}
 			
-			yield req.collection.updateOneAsync({ _id: req.recordingID }, { $push: update })
-			return { ok: true }
+			const write = yield req.collection.updateOneAsync({ _id: req.recordingID }, { $push: update })
+			if (write.result.n)
+			{
+				return { ok: true }
+			}
+			else
+			{
+				return this.errors.recordNotFound(req.recordingID)
+			}
 		}
 		
 		*view(req)

@@ -41,4 +41,20 @@ describe('telemetry', function()
 		assert.deepEqual(record.testThing.exampleTimeline, timeline1)
 		assert.deepEqual(record.anotherThing.secondTimeline, timeline2)
 	})
+	
+	it('should return an error when writing to an invalid session', function*()
+	{
+		const ws = yield helpers.createAuthedSocket()
+		const request = {
+			sessionID: testBucket + '|invalid',
+			timelines: [
+				{
+					object: 'test',
+					name: 'testTimeline',
+					entries: [ {} ],
+				},
+			],
+		}
+		yield helpers.request(ws, '/telemetry/record', request, helpers.assertError('telemetry/recordNotFound'))
+	})
 })
