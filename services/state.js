@@ -68,9 +68,9 @@ module.exports = function*(loader)
 		
 		*modify(req)
 		{
-			if (!(req.params.changes instanceof Array))
+			if (!(req.params.changes instanceof Array) || req.params.changes.length === 0)
 			{
-				return this.errors.messageParsingFailed()
+				return this.errors.messageParsingFailed('changes')
 			}
 			
 			const changeRequests = []
