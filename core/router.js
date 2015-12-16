@@ -111,7 +111,7 @@ class Router
 			catch (err)
 			{
 				self.log.error(err)
-				data = this.errors.internalError()
+				data = self.errors.internalError()
 			}
 			
 			const timeTaken = Date.now() - receivedAt
