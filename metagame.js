@@ -95,9 +95,9 @@ class MetagameServer
 				userMap: this.userMap,
 				config: this.config,
 			})
-      
-      const serviceName = utils.detectName(service, 'service')
-      service.log = this.createLogger(serviceName)
+			
+			const serviceName = utils.detectName(service, 'service')
+			service.log = this.createLogger(serviceName)
 			
 			if (service.init)
 			{
