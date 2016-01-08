@@ -96,13 +96,18 @@ module.exports = function*(loader)
 			
 			for (let attempt = 0; attempt < this.config.state.maxRetries; attempt++)
 			{
+        const InstanceType = req.collectionConfig.InstanceType
 				let instance = yield req.collection.findOneAsync({ _id: req.params.id })
 				if (!instance)
 				{
-					instance = new req.collectionConfig.InstanceType()
+					instance = new InstanceType()
 					instance.v = 1
 					instance._id = req.params.id
 				}
+        else
+        {
+          instance.__proto__ = InstanceType.prototype
+        }
 				
 				for (const changeRequest of changeRequests)
 				{

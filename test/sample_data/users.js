@@ -10,6 +10,18 @@ class TestUser
 		this.currency = 0
 		this.items = []
 	}
+  
+  purchaseItem(itemName, cost)
+  {
+    if (this.currency < cost)
+    {
+      return false
+    }
+    
+    this.items.push(itemName)
+    this.currency -= cost
+    return true
+  }
 }
 
 const items = {
@@ -26,13 +38,10 @@ const buyItem = {
 			return errors.itemNotFoundError
 		}
 		
-		if (testUser.currency < item.cost)
-		{
+    if (!testUser.purchaseItem(params.itemName, item.cost))
+    {
 			return errors.notEnoughCurrencyError
-		}
-		
-		testUser.currency -= item.cost
-		testUser.items.push(params.itemName)
+    }
 	},
 	test: function*(user, id)
 	{
