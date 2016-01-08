@@ -4,6 +4,8 @@ services:
   - mongodb
   - redis
 node_js:
+  - "5.4"
+  - "5.3"
   - "5.2"
   - "5.1"
   - "5.0"

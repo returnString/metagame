@@ -38,9 +38,7 @@ See the [issue tracker](https://github.com/returnString/metagame/labels/feature)
 
 Officially, the following Node versions are tested on Linux and Windows:
 - 4.2 (LTS)
-- 5.0
-- 5.1
-- 5.2
+- 5.x (0-4)
 
 Unofficially, it's primarily developed on OSX, but CI doesn't cover that.
 
