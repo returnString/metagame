@@ -95,6 +95,9 @@ class MetagameServer
 				userMap: this.userMap,
 				config: this.config,
 			})
+      
+      const serviceName = utils.detectName(service, 'service')
+      service.log = this.createLogger(serviceName)
 			
 			if (service.init)
 			{
@@ -104,7 +107,7 @@ class MetagameServer
 			const routes = service.getRoutes()
 			for (const route of routes)
 			{
-				const path = '/' + utils.detectName(service, 'service') + '/' + route[0]
+				const path = '/' + serviceName + '/' + route[0]
 				const handler = route[1].bind(service)
 				let middleware = route[2]
 				if (middleware)
