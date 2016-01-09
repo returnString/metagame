@@ -22,5 +22,18 @@
     "start": "node metagame config_example | bunyan"
   },
   "author": "Ruan Pearce-Authers",
-  "license": "MIT"
+  "license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/returnString/metagame"
+	},
+	"bugs": {
+		"url": "https://github.com/returnString/metagame/issues"
+	},
+	"contributors": [
+		{
+			"name": "Ruan Pearce-Authers",
+			"email": "ruanpa@outlook.com"
+		}
+	]
 }
