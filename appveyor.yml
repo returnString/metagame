@@ -1,6 +1,7 @@
 environment:
   matrix:
-  - nodejs_version: "5.4"
+	# not yet supported for appveyor
+  #- nodejs_version: "5.4"
   - nodejs_version: "5.3"
   - nodejs_version: "5.2"
   - nodejs_version: "5.1"
