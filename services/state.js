@@ -101,7 +101,7 @@ module.exports = function*(loader)
 				if (!instance)
 				{
 					instance = new InstanceType()
-					instance.v = 1
+					instance.v = 0
 					instance._id = req.params.id
 				}
 				else
@@ -131,31 +131,10 @@ module.exports = function*(loader)
 				const requiredVersion = instance.v
 				instance.v++
 				
-				if (requiredVersion === 1)
+				const write = yield req.collection.updateAsync({ _id: req.params.id, v: requiredVersion }, instance, { upsert: true })
+				if (write.result.n === 0)
 				{
-					try
-					{
-						yield req.collection.insertAsync(instance)
-					}
-					catch (err)
-					{
-						if (err.code === 11000)
-						{
-							continue
-						}
-						else
-						{
-							return this.errors.internalError()
-						}
-					}
-				}
-				else
-				{
-					const write = yield req.collection.updateAsync({ _id: req.params.id, v: requiredVersion }, instance)
-					if (write.result.n === 0)
-					{
-						continue
-					}
+					continue
 				}
 				
 				return { instance }
