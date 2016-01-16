@@ -43,7 +43,7 @@ function* boot()
 	
 	if (!initialised)
 	{
-		initialised = true;
+		initialised = true
 		for (const prop in config.mongodb)
 		{
 			const connectionProfile = config.mongodb[prop]
