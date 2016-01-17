@@ -42,7 +42,7 @@ class Service
 		
 		const database = util.format('%s_%s_%s', this.config.sandbox, utils.detectName(this.platform, 'platform'), connectionProfile.database || connectionName)
 		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
-		return yield mongodb.MongoClient.connect(connString)
+		return yield mongodb.MongoClient.connect(connString, { db: { w: connectionProfile.writeConcern || 'majority' } })
 	}
 	
 	*createRedisConnection(connectionName)
