@@ -109,11 +109,7 @@ class MetagameServer
 			{
 				const path = '/' + serviceName + '/' + route[0]
 				const handler = route[1].bind(service)
-				let middleware = route[2]
-				if (middleware)
-				{
-					middleware = middleware.map(func => func.bind(service))
-				}
+				const middleware = route[2] ? route[2].map(func => func.bind(service)) : null
 				router.addRoute(path, handler, middleware)
 			}
 		}

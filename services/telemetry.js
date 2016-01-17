@@ -63,7 +63,7 @@ module.exports = function*(loader)
 				return this.errors.messageParsingFailed('timelines')
 			}
 			
-			let update = {}
+			const update = {}
 			for (const timeline of req.params.timelines)
 			{
 				const objectName = timeline.object
