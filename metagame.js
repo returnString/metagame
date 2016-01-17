@@ -116,6 +116,10 @@ class MetagameServer
 		
 		router.start()
 		this.log.info('init done')
+		if (cluster.isWorker)
+		{
+			process.send('initDone')
+		}
 	}
 	
 	*init()
@@ -131,9 +135,28 @@ class MetagameServer
 				workerCount
 			}, 'forking')
 			
+			cluster.on('exit', (worker, code, signal) =>
+			{
+				const replacement = cluster.fork()
+				this.log.info({
+					code,
+					signal,
+					dead: worker.id,
+					replacement: replacement.id,
+				})
+			})
+			
+			let initialisedWorkers = 0
 			for (let i = 0; i < workerCount; i++)
 			{
-				cluster.fork()
+				const worker = cluster.fork()
+				worker.on('message', message =>
+				{
+					if (message === 'initDone' && ++initialisedWorkers === workerCount)
+					{
+						this.log.info('all workers intialised')
+					}
+				})
 			}
 		}
 		else
