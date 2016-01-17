@@ -9,7 +9,7 @@
     "co": "^4.6.0",
     "geoip-lite": "^1.1.6",
     "mongodb": "^2.0.48",
-    "node-uuid": "^1.4.3",
+    "node-uuid": "^1.4.7",
     "redis": "^2.4.2",
     "ws": "^0.8.0"
   },
@@ -23,17 +23,17 @@
   },
   "author": "Ruan Pearce-Authers",
   "license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/returnString/metagame"
-	},
-	"bugs": {
-		"url": "https://github.com/returnString/metagame/issues"
-	},
-	"contributors": [
-		{
-			"name": "Ruan Pearce-Authers",
-			"email": "ruanpa@outlook.com"
-		}
-	]
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/returnString/metagame"
+  },
+  "bugs": {
+    "url": "https://github.com/returnString/metagame/issues"
+  },
+  "contributors": [
+    {
+      "name": "Ruan Pearce-Authers",
+      "email": "ruanpa@outlook.com"
+    }
+  ]
 }
