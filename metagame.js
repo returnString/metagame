@@ -21,7 +21,7 @@ const loader = {
 	Service: require('./core/service'),
 }
 
-const promisify = [ 'fs', 'mongodb', 'redis' ]
+const promisify = [ 'fs', 'redis' ]
 for (const moduleName of promisify)
 {
 	const module = require(moduleName)

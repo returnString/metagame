@@ -49,7 +49,7 @@ function* boot()
 			const connectionProfile = config.mongodb[prop]
 			const database = util.format('%s_%s_%s', config.sandbox, utils.detectName(currentServer.platform, 'platform'), connectionProfile.database || prop)
 			const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
-			const db = yield mongodb.MongoClient.connectAsync(connString)
+			const db = yield mongodb.MongoClient.connect(connString)
 			yield db.dropDatabase()
 		}
 	}

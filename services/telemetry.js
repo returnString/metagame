@@ -31,7 +31,7 @@ module.exports = function*(loader)
 			
 			req.bucket = tokens[0]
 			req.recordingID = tokens[1]
-			req.collection = yield this.mongo.collectionAsync('telemetry_' + req.bucket)
+			req.collection = this.mongo.collection('telemetry_' + req.bucket)
 		}
 		
 		getRoutes()
@@ -48,8 +48,8 @@ module.exports = function*(loader)
 			const bucket = req.params.bucket || 'unknown'
 			const recordingID = uuid.v4()
 			const sessionID = bucket + '|' + recordingID
-			const collection = yield this.mongo.collectionAsync('telemetry_' + bucket)
-			yield collection.insertAsync({
+			const collection = this.mongo.collection('telemetry_' + bucket)
+			yield collection.insert({
 				_id: recordingID,
 				users: [ req.user.id ],
 			})
@@ -71,7 +71,7 @@ module.exports = function*(loader)
 				update[objectName + '.' + timelineName] = { $each: timeline.entries }
 			}
 			
-			const write = yield req.collection.updateOneAsync({ _id: req.recordingID }, { $push: update })
+			const write = yield req.collection.updateOne({ _id: req.recordingID }, { $push: update })
 			if (write.result.n)
 			{
 				return { ok: true }
@@ -84,7 +84,7 @@ module.exports = function*(loader)
 		
 		*view(req)
 		{
-			const record = yield req.collection.findOneAsync({ _id: req.recordingID })
+			const record = yield req.collection.findOne({ _id: req.recordingID })
 			if (!record)
 			{
 				return this.errors.recordNotFound(req.recordingID)

@@ -63,8 +63,7 @@ module.exports = function*(loader)
 		
 		*getCollection(req)
 		{
-			const findResult = yield req.collection.findAsync()
-			return findResult.toArray()
+			return yield req.collection.find({}).toArray()
 		}
 		
 		*getAdvertised(req)
@@ -74,7 +73,7 @@ module.exports = function*(loader)
 		
 		*getInstance(req)
 		{
-			const result = yield req.collection.findOneAsync({ _id: req.params.id })
+			const result = yield req.collection.findOne({ _id: req.params.id })
 			if (!result)
 			{
 				return this.errors.instanceNotFound()
@@ -109,7 +108,7 @@ module.exports = function*(loader)
 			for (let attempt = 0; attempt < this.config.state.maxRetries; attempt++)
 			{
 				const InstanceType = req.collectionConfig.InstanceType
-				let instance = yield req.collection.findOneAsync({ _id: req.params.id })
+				let instance = yield req.collection.findOne({ _id: req.params.id })
 				if (!instance)
 				{
 					instance = new InstanceType()
@@ -145,7 +144,7 @@ module.exports = function*(loader)
 				instance.v = requiredVersion + 1
 				
 				// only commit the write if the version matches and the instance isn't locked by a multi-update
-				const write = yield req.collection.updateAsync({ _id: req.params.id, v: requiredVersion, l: { $exists: false } }, instance, { upsert: true })
+				const write = yield req.collection.updateOne({ _id: req.params.id, v: requiredVersion, l: { $exists: false } }, instance, { upsert: true })
 				if (write.result.n === 0)
 				{
 					continue
@@ -162,7 +161,7 @@ module.exports = function*(loader)
 			for (const lockedInstance of lockedList)
 			{
 				// only delete the lock if it matches the lock data we submitted
-				yield lockedInstance.collection.updateAsync({ _id: lockedInstance.instanceID, l: lockData }, { $unset: { l: '' } })
+				yield lockedInstance.collection.updateOne({ _id: lockedInstance.instanceID, l: lockData }, { $unset: { l: '' } })
 			}
 		}
 		
@@ -218,7 +217,7 @@ module.exports = function*(loader)
 				// if any instances fail to lock, clear all acquired locks and abort
 				// currently, instances must already exist to be eligible
 				// TODO: retries
-				const lockWrite = yield collection.updateAsync({ _id: instanceID, l: { $exists: false } }, { $set: { l: lockData }, $inc: { v: 1 } })
+				const lockWrite = yield collection.updateOne({ _id: instanceID, l: { $exists: false } }, { $set: { l: lockData }, $inc: { v: 1 } })
 				if (lockWrite.result.n === 1)
 				{
 					locked.push({ instanceID, collection })
@@ -234,7 +233,7 @@ module.exports = function*(loader)
 			for (const targetID in instanceData)
 			{ 
 				const data = instanceData[targetID]
-				const target = yield data.collection.findOneAsync({ _id: data.instanceID })
+				const target = yield data.collection.findOne({ _id: data.instanceID })
 						
 				// bump up the target's version and ensure we can use the target type's methods inside the change
 				target.v++
@@ -261,7 +260,7 @@ module.exports = function*(loader)
 			for (const targetID in instanceData)
 			{
 				const data = instanceData[targetID]
-				yield data.collection.updateAsync({ _id: data.instanceID }, targets[targetID])
+				yield data.collection.update({ _id: data.instanceID }, targets[targetID])
 			}
 			
 			yield this.unlock(locked, lockData)
