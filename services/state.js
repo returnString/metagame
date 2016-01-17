@@ -260,7 +260,7 @@ module.exports = function*(loader)
 			for (const targetID in instanceData)
 			{
 				const data = instanceData[targetID]
-				yield data.collection.update({ _id: data.instanceID }, targets[targetID])
+				yield data.collection.updateOne({ _id: data.instanceID }, targets[targetID])
 			}
 			
 			yield this.unlock(locked, lockData)
