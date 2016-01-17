@@ -134,14 +134,17 @@ describe('state', function()
 			it('should allow a cross-instance modification request', function*()
 			{
 				const senderID = 'sender'
+				const recipientID = 'recipient'
 				const ws = yield helpers.createAuthedSocket(senderID)
+				const recipientWs = yield helpers.createAuthedSocket(recipientID)
 				yield modify(ws, { id: senderID, changes: setCurrencyRequest(1000) })
+				yield modify(recipientWs, { id: recipientID, changes: setCurrencyRequest(0) })
 
 				const params = {
 					name: 'transferCurrency',
 					targets: {
 						sender: senderID,
-						recipient: 'recipient',	
+						recipient: recipientID,	
 					},
 					params: {
 						amount: 400,
@@ -150,6 +153,7 @@ describe('state', function()
 				
 				yield helpers.request(ws, '/state/transaction', params, res =>
 				{
+					helpers.assertOk(res)
 					assert.strictEqual(res.data.sender.currency, 600)
 					assert.strictEqual(res.data.recipient.currency, 400)
 				})
