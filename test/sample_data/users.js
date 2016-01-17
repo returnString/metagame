@@ -30,7 +30,7 @@ const items = {
 }
 
 const buyItem = {
-	apply: function*(testUser, params)
+	*apply(testUser, params)
 	{
 		const item = items[params.itemName]
 		if (!item)
@@ -43,25 +43,25 @@ const buyItem = {
 			return errors.notEnoughCurrencyError
 		}
 	},
-	test: function*(user, id)
+	*test(user, id)
 	{
 		return user.id == id
 	}
 }
 
 const grantCurrency = {
-	apply: function*(testUser, params)
+	*apply(testUser, params)
 	{
 		testUser.currency += params.currency
 	},
-	test: function*(user)
+	*test(user)
 	{
 		return user.privileges.server
 	},
 }
 
 const setCurrency = {
-	apply: function*(testUser, params)
+	*apply(testUser, params)
 	{
 		testUser.currency = params.currency
 	},
