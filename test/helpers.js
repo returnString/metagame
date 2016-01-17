@@ -32,8 +32,8 @@ function* boot()
 	}
 	
 	const config = require('../config_example')
-	config.websocket.port = 0
-	config.websocket.ssl.port = 0
+	config.server.port = 0
+	config.server.tls.port = 0
 	config.sandbox = 'tests'
 	config.clustering.enabled = false
 	config.logging.verbosity = 'error'

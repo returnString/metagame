@@ -8,16 +8,16 @@ module.exports = {
 	// if you want to run multiple instances on one DB, make sure each one uses a different sandbox
 	// the tests run in the 'tests' sandbox
 	sandbox: 'default',
-	websocket: {
-		// port for ws:// connections
+	server: {
+		// port for insecure connections
 		port: 1337,
 		// set this to true if you want to trust x-forwarded-for headers for client IP addresses
 		proxied: false,
-		ssl: {
+		tls: {
 			// if enabled, metagame will also accept secure connections
 			// you should use this if *anything* is sent over a public network
 			enabled: true,
-			// port for wss:// connections
+			// port for secure connections
 			port: 1338,
 			// the public certificate for SSL
 			cert: 'keys/metagame_cert.pem',

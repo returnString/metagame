@@ -59,14 +59,14 @@ class MetagameServer
 			res.end('upgrade required for metagame websocket server')
 		}
 		
-		this.httpServer = http.createServer(processHttpRequest).listen(this.config.websocket.port)
+		this.httpServer = http.createServer(processHttpRequest).listen(this.config.server.port)
 		
-		if (this.config.websocket.ssl.enabled)
+		if (this.config.server.tls.enabled)
 		{
 			this.httpsServer = https.createServer({
-				key: yield fs.readFileAsync(this.config.websocket.ssl.key),
-				cert: yield fs.readFileAsync(this.config.websocket.ssl.cert),
-			}, processHttpRequest).listen(this.config.websocket.ssl.port)
+				key: yield fs.readFileAsync(this.config.server.tls.key),
+				cert: yield fs.readFileAsync(this.config.server.tls.cert),
+			}, processHttpRequest).listen(this.config.server.tls.port)
 		}
 		
 		const webSocketServer = new WebSocketServer({

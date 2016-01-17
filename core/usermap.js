@@ -13,7 +13,7 @@ class UserMap
 	
 	getIP(socket)
 	{
-		if (this.config.websocket.proxied)
+		if (this.config.server.proxied)
 		{
 			const forwardedFor = socket.upgradeReq.headers['x-forwarded-for']
 			if (forwardedFor)
