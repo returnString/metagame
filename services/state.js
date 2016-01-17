@@ -15,12 +15,16 @@ module.exports = function*(loader)
 			'changeFailed',
 			'changeContention',
 			'targetMissing',
+			'lockFailed',
+			'lockExpired',
 		]}
 		
 		*init()
 		{
 			this.db = yield this.createMongoConnection('state')
 			this.dataConfig = loader.require(this.config.state.data)
+			this.lockTimeout = this.config.state.lockTimeout * 1000
+			
 			for (const collectionName in this.dataConfig.collections)
 			{
 				this.dataConfig.collections[collectionName].name = collectionName
@@ -143,8 +147,16 @@ module.exports = function*(loader)
 				
 				instance.v = requiredVersion + 1
 				
-				// only commit the write if the version matches and the instance isn't locked by a multi-update
-				const write = yield req.collection.updateOne({ _id: req.params.id, v: requiredVersion, l: { $exists: false } }, instance, { upsert: true })
+				// only commit the write if the version matches and the instance isn't locked by a transaction
+				const query = {
+					_id: req.params.id,
+					v: requiredVersion,
+					$or: [
+						{ l: { $exists: false } },
+						{ 'l.e': { $lt: Date.now() }},
+					],
+				}
+				const write = yield req.collection.updateOne(query, instance, { upsert: true })
 				if (write.result.n === 0)
 				{
 					continue
@@ -161,7 +173,7 @@ module.exports = function*(loader)
 			for (const lockedInstance of lockedList)
 			{
 				// only delete the lock if it matches the lock data we submitted
-				yield lockedInstance.collection.updateOne({ _id: lockedInstance.instanceID, l: lockData }, { $unset: { l: '' } })
+				yield lockedInstance.collection.updateOne({ _id: lockedInstance.instanceID, 'l.g': lockData.g }, { $unset: { l: '' } })
 			}
 		}
 		
@@ -204,7 +216,7 @@ module.exports = function*(loader)
 				}
 			}
 			
-			const lockData = { t: Date.now(), g: uuid.v4(), h: os.hostname() }
+			const lockData = { e: Date.now() + this.lockTimeout, g: uuid.v4(), h: os.hostname() }
 			const locked = []
 			
 			// try to acquire lock on all affected instances
@@ -213,10 +225,21 @@ module.exports = function*(loader)
 				const data = instanceData[targetID]
 				const collection = data.collection
 				const instanceID = data.instanceID
-
-				// if any instances fail to lock, clear all acquired locks and abort
-				// TODO: retries
-				const lockWrite = yield collection.updateOne({ _id: instanceID, l: { $exists: false } }, { $set: { l: lockData }, $inc: { v: 1 } }, { upsert: true })
+				
+				// we can take the lock if none already exists, or the previous lock expired
+				const lockQuery = {
+					_id: instanceID,
+					$or: [
+						{ l: { $exists: false } },
+						{ 'l.e': { $lt: Date.now() } },
+					],
+				}
+				const lockUpdate = {
+					$set: { l: lockData },
+					$inc: { v: 1 },
+				}
+				
+				const lockWrite = yield collection.updateOne(lockQuery, lockUpdate, { upsert: true })
 				
 				// if this was an upsert, run the type's ctor later rather than just attaching to __proto__
 				data.wasCreated = lockWrite.upsertedCount === 1
@@ -227,8 +250,10 @@ module.exports = function*(loader)
 				}
 				else
 				{
+					// if any instances fail to lock, clear all acquired locks and abort
+					// TODO: retries
 					yield this.unlock(locked, lockData)
-					return this.errors.changeContention({ instanceID })
+					return this.errors.lockFailed({ instanceID })
 				}
 			}
 			
@@ -243,9 +268,11 @@ module.exports = function*(loader)
 					target = new data.InstanceType()
 					target.v = 0
 					target._id = data.instanceID
+					target.l = lockData
 				}
 				else
 				{
+					// TODO: Parallelise these fetches
 					target = yield data.collection.findOne({ _id: data.instanceID })
 					target.__proto__ = data.InstanceType.prototype
 				}
@@ -270,14 +297,29 @@ module.exports = function*(loader)
 				return this.errors.changeFailed({ changeResult })
 			}
 			
+			// TODO: find a way to ensure all these writes are committed, even if the server dies midway through
+			const writePromises = []
 			for (const targetID in instanceData)
 			{
 				const data = instanceData[targetID]
-				yield data.collection.updateOne({ _id: data.instanceID }, targets[targetID])
+				// our lock may have technically expired here, depending on how complex the transaction is
+				// assert that no-one else has replaced our potentially expired lock by comparing the guids 
+				// TODO: better handling of edge cases for this
+				writePromises.push(data.collection.updateOne({ _id: data.instanceID, 'l.g': lockData.g }, targets[targetID]))
 			}
 			
+			const writes = yield Promise.all(writePromises)
+			const failedWrite = writes.find(w => w.modifiedCount === 0)
 			yield this.unlock(locked, lockData)
-			return targets
+			
+			if (!failedWrite)
+			{
+				return targets
+			}
+			else
+			{
+				return this.errors.lockExpired()
+			}
 		}
 	}
 	

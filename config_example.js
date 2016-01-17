@@ -67,7 +67,9 @@ module.exports = {
 	state: {
 		// the module from which the state service loads the collection list
 		data: 'test/sample_data/',
-		// the maximum number of retries for optimistic locking on state changes
+		// the maximum number of retries for optimistic concurrency control on state changes
 		maxRetries: 5,
+		// the duration, in seconds, after which a transaction instance lock is considered to be expired
+		lockTimeout: 10,
 	},
 }
