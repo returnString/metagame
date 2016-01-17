@@ -136,10 +136,8 @@ describe('state', function()
 				const senderID = 'sender'
 				const recipientID = 'recipient'
 				const ws = yield helpers.createAuthedSocket(senderID)
-				const recipientWs = yield helpers.createAuthedSocket(recipientID)
 				yield modify(ws, { id: senderID, changes: setCurrencyRequest(1000) })
-				yield modify(recipientWs, { id: recipientID, changes: setCurrencyRequest(0) })
-
+				
 				const params = {
 					name: 'transferCurrency',
 					targets: {

@@ -215,10 +215,13 @@ module.exports = function*(loader)
 				const instanceID = data.instanceID
 
 				// if any instances fail to lock, clear all acquired locks and abort
-				// currently, instances must already exist to be eligible
 				// TODO: retries
-				const lockWrite = yield collection.updateOne({ _id: instanceID, l: { $exists: false } }, { $set: { l: lockData }, $inc: { v: 1 } })
-				if (lockWrite.result.n === 1)
+				const lockWrite = yield collection.updateOne({ _id: instanceID, l: { $exists: false } }, { $set: { l: lockData }, $inc: { v: 1 } }, { upsert: true })
+				
+				// if this was an upsert, run the type's ctor later rather than just attaching to __proto__
+				data.wasCreated = lockWrite.upsertedCount === 1
+				
+				if (data.wasCreated || lockWrite.modifiedCount === 1)
 				{
 					locked.push({ instanceID, collection })
 				}
@@ -233,11 +236,21 @@ module.exports = function*(loader)
 			for (const targetID in instanceData)
 			{ 
 				const data = instanceData[targetID]
-				const target = yield data.collection.findOne({ _id: data.instanceID })
-						
-				// bump up the target's version and ensure we can use the target type's methods inside the change
+				
+				let target
+				if (data.wasCreated)
+				{
+					target = new data.InstanceType()
+					target.v = 0
+					target._id = data.instanceID
+				}
+				else
+				{
+					target = yield data.collection.findOne({ _id: data.instanceID })
+					target.__proto__ = data.InstanceType.prototype
+				}
+				
 				target.v++
-				target.__proto__ = data.InstanceType.prototype
 				targets[targetID] = target
 			}
 			
