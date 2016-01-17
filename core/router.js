@@ -64,13 +64,13 @@ class Router
 		}
 	}
 	
-	respond(socket, data, correlation, timeTaken)
+	respond(socket, data, correlation, receivedAt)
 	{
 		const dataSlot = data instanceof MetagameError ? 'error' : 'data'
 		const response = {
 			[dataSlot]: data,
 			workerID: utils.getWorkerID(),
-			timeTaken,
+			timeTaken: Date.now() - receivedAt,
 			correlation,
 		}
 		
@@ -81,6 +81,8 @@ class Router
 	
 	onMessage(socket, message)
 	{
+		const receivedAt = Date.now()
+
 		let requestData
 		try
 		{
@@ -93,11 +95,10 @@ class Router
 		
 		if (!requestData || !requestData.path)
 		{
-			this.respond(socket, this.errors.messageParsingFailed())
+			this.respond(socket, this.errors.messageParsingFailed(), requestData.correlation, receivedAt)
 			return
 		}
 		
-		const receivedAt = Date.now()
 		this.log.debug({ requestData }, 'message received')
 		
 		const self = this
@@ -114,8 +115,7 @@ class Router
 				data = self.errors.internalError()
 			}
 			
-			const timeTaken = Date.now() - receivedAt
-			self.respond(socket, data, requestData.correlation, timeTaken)
+			self.respond(socket, data, requestData.correlation, receivedAt)
 		}).catch(err =>
 		{
 			self.log.error(err)
