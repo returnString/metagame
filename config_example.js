@@ -20,9 +20,9 @@ module.exports = {
 			// port for secure connections
 			port: 1338,
 			// the public certificate for SSL
-			cert: 'keys/metagame_cert.pem',
+			cert: 'test/keys/metagame_cert.pem',
 			// the private key for SSL; keep this file secure!
-			key: 'keys/metagame_key.pem',
+			key: 'test/keys/metagame_key.pem',
 		},
 	},
 	// all these service modules will be loaded on startup
