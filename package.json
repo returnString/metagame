@@ -1,7 +1,7 @@
 {
   "name": "metagame",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "extensible online game backend",
   "main": "metagame.js",
   "dependencies": {
     "bluebird": "^3.0.5",
