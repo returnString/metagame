@@ -109,6 +109,8 @@ module.exports = function*(loader)
 					instance.__proto__ = InstanceType.prototype
 				}
 				
+				const requiredVersion = instance.v
+				
 				for (const changeRequest of changeRequests)
 				{
 					let changeResult
@@ -128,8 +130,7 @@ module.exports = function*(loader)
 					}
 				}
 				
-				const requiredVersion = instance.v
-				instance.v++
+				instance.v = requiredVersion + 1
 				
 				const write = yield req.collection.updateAsync({ _id: req.params.id, v: requiredVersion }, instance, { upsert: true })
 				if (write.result.n === 0)
