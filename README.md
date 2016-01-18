@@ -41,7 +41,12 @@ Officially, the following Node versions are tested on Linux and Windows:
 
 Unofficially, it's primarily developed on OSX, but CI doesn't cover that.
 
-To install and run:
+To install metagame into your project:
+```
+npm install metagame --save
+```
+
+To install from source, test, and run:
 ```
 git clone https://github.com/returnString/metagame
 cd metagame
