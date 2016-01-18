@@ -1,6 +1,6 @@
 {
   "name": "metagame",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "extensible online game backend",
   "main": "metagame.js",
   "dependencies": {
