@@ -18,11 +18,6 @@ module.exports = function*(loader)
 		*getCollection(req)
 		{
 			const sessionID = req.params.sessionID
-			if (!sessionID || typeof sessionID !== 'string')
-			{
-				return this.errors.messageParsingFailed('sessionID')
-			}
-			
 			const tokens = sessionID.split('|')
 			if (tokens.length !== 2)
 			{
@@ -36,16 +31,27 @@ module.exports = function*(loader)
 		
 		getRoutes()
 		{
+			const bucket = { type: 'string' }
+			const sessionID = { type: 'string' }
+			const timelines = {
+				type: 'array',
+				name: { type: 'string' },
+				object: { type: 'string' },
+				entries: {
+					type: 'array',
+				},
+			}
+			
 			return [
-				[ 'start', this.start, [ this.authenticated ] ],
-				[ 'record', this.record, [ this.authenticated, this.getCollection ] ],
-				[ 'view', this.view, [ this.authenticated, this.getCollection ] ],
+				[ 'start', this.start, [ this.authenticated, this.schema({ bucket }) ] ],
+				[ 'record', this.record, [ this.authenticated, this.getCollection, this.schema({ sessionID, timelines }) ] ],
+				[ 'view', this.view, [ this.authenticated, this.getCollection, this.schema({ sessionID }) ] ],
 			]
 		}
 		
 		*start(req)
 		{
-			const bucket = req.params.bucket || 'unknown'
+			const bucket = req.params.bucket
 			const recordingID = uuid.v4()
 			const sessionID = bucket + '|' + recordingID
 			const collection = this.mongo.collection('telemetry_' + bucket)

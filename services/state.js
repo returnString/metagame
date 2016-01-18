@@ -31,14 +31,6 @@ module.exports = function*(loader)
 			}
 		}
 		
-		*validateChanges(req)
-		{
-			if (!Array.isArray(req.params.changes) || req.params.changes.length === 0)
-			{
-				return this.errors.messageParsingFailed('changes')
-			}
-		}
-		
 		*getCollectionAndConfig(req)
 		{
 			const name = req.params.collection
@@ -56,12 +48,27 @@ module.exports = function*(loader)
 		{
 			const middleware = [ this.authenticated, this.getCollectionAndConfig ]
 			
+			const collection = { type: 'string' }
+			const instance = { type: 'string' }
+			const modifyChanges = {
+				type: 'array',
+				items: {
+					type: 'object',
+					name: { type: 'string' },
+				},
+			}
+			
+			const transactionChanges = {
+				name: { type: 'string' },
+				targets: { type: 'object' },
+			}
+			
 			return [
-				[ 'collection', this.getCollection, middleware ],
-				[ 'advertised', this.getAdvertised, middleware ],
-				[ 'instance', this.getInstance, middleware ],
-				[ 'modify', this.modify, [ ...middleware, this.validateChanges ] ],
-				[ 'transaction', this.transaction, [ this.authenticated ] ],
+				[ 'collection', this.getCollection, [ ...middleware, this.schema({ collection }) ] ],
+				[ 'advertised', this.getAdvertised, [ ...middleware, this.schema({ collection }) ] ],
+				[ 'instance', this.getInstance, [ ...middleware, this.schema({ collection, instance }) ] ],
+				[ 'modify', this.modify, [ ...middleware, this.schema({ collection, instance, changes: modifyChanges }) ] ],
+				[ 'transaction', this.transaction, [ this.authenticated, this.schema({ collection, instance, changes: transactionChanges }) ] ],
 			]
 		}
 		
@@ -184,11 +191,6 @@ module.exports = function*(loader)
 			if (!change)
 			{
 				return this.errors.changeNotFound()
-			}
-			
-			if (typeof change.targets !== 'object')
-			{
-				return this.errors.messageParsingFailed('change.targets')
 			}
 			
 			const instanceData = {}

@@ -12,7 +12,7 @@ module.exports = function*(loader)
 		getRoutes()
 		{
 			return [
-				[ 'login', this.login ],
+				[ 'login', this.login, [ this.schema({ client: { type: 'string' } }) ] ],
 				[ 'logout', this.logout, [ this.authenticated ] ],
 			]
 		}

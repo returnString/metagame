@@ -5,6 +5,7 @@ const mongodb = require('mongodb')
 const redis = require('redis')
 const ErrorContainer = require('./error').ErrorContainer
 const utils = require('./utils')
+const jsonschema = require('jsonschema')
 
 class Service
 {
@@ -14,6 +15,8 @@ class Service
 		this.platform = options.platform
 		this.userMap = options.userMap
 		this.errors = new ErrorContainer(utils.detectName(this, 'service'), this.config)
+		this.schemaValidator = new jsonschema.Validator()
+		
 		if (this.serviceErrors)
 		{
 			for (const error of this.serviceErrors)
@@ -30,6 +33,21 @@ class Service
 		{
 			return this.errors.authenticationRequired()
 		}
+	}
+	
+	schema(requestSchema)
+	{
+		const fullSchema = { properties: requestSchema }
+		function* validate(request)
+		{
+			const result = this.schemaValidator.validate(request.params, fullSchema)
+			if (!result.valid)
+			{
+				return this.errors.messageParsingFailed(result)
+			}
+		}
+		
+		return validate
 	}
 	
 	*createMongoConnection(connectionName)

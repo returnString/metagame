@@ -127,6 +127,7 @@ describe('state', function()
 			yield invalidRequest(1)
 			yield invalidRequest('')
 			yield invalidRequest({})
+			yield invalidRequest([ 1 ])
 		})
 		
 		describe('cross-instance modification', function()

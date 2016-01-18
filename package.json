@@ -8,6 +8,7 @@
     "bunyan": "^1.5.1",
     "co": "^4.6.0",
     "geoip-lite": "^1.1.6",
+    "jsonschema": "^1.0.3",
     "mongodb": "^2.0.48",
     "node-uuid": "^1.4.7",
     "redis": "^2.4.2",
