@@ -31,7 +31,7 @@ function* boot()
 		currentServer.close()
 	}
 	
-	const config = require('../config_example')
+	const config = require('../sample_game/config')
 	config.server.port = 0
 	config.server.tls.port = 0
 	config.sandbox = 'tests'

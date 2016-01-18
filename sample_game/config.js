@@ -20,9 +20,9 @@ module.exports = {
 			// port for secure connections
 			port: 1338,
 			// the public certificate for SSL
-			cert: 'test/keys/metagame_cert.pem',
+			cert: 'sample_game/keys/metagame_cert.pem',
 			// the private key for SSL; keep this file secure!
-			key: 'test/keys/metagame_key.pem',
+			key: 'sample_game/keys/metagame_key.pem',
 		},
 	},
 	// all these service modules will be loaded on startup
@@ -66,7 +66,7 @@ module.exports = {
 	},
 	state: {
 		// the module from which the state service loads the collection list
-		data: 'test/sample_data/',
+		data: 'sample_game/state/',
 		// the maximum number of retries for optimistic concurrency control on state changes
 		maxRetries: 5,
 		// the duration, in seconds, after which a transaction instance lock is considered to be expired

@@ -19,7 +19,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "start": "node metagame config_example | bunyan"
+    "start": "node metagame sample_game/config | bunyan"
   },
   "author": "Ruan Pearce-Authers",
   "license": "MIT",

@@ -3,7 +3,7 @@
 require('./setup')()
 const assert = require('assert')
 const helpers = require('./helpers')
-const sample = require('./sample_data')
+const state = require('../sample_game/state')
 
 describe('state', function()
 {
@@ -27,7 +27,7 @@ describe('state', function()
 		{
 			const ws = yield helpers.createAuthedSocket()
 			yield helpers.request(ws, '/state/advertised', { collection: 'users' },
-				res => assert.deepEqual(res.data.advertised, sample.collections.users.advertised))
+				res => assert.deepEqual(res.data.advertised, state.collections.users.advertised))
 		})
 	})
 	
