@@ -37,6 +37,7 @@ function* boot()
 	config.sandbox = 'tests'
 	config.clustering.enabled = false
 	config.logging.verbosity = 'error'
+	config.mongodb.defaultWriteConcern = 1
 	
 	currentServer = new MetagameServer(config)
 	yield currentServer.init()
@@ -44,9 +45,9 @@ function* boot()
 	if (!initialised)
 	{
 		initialised = true
-		for (const prop in config.mongodb)
+		for (const prop in config.mongodb.connections)
 		{
-			const connectionProfile = config.mongodb[prop]
+			const connectionProfile = config.mongodb.connections[prop]
 			const database = util.format('%s_%s_%s', config.sandbox, utils.detectName(currentServer.platform, 'platform'), connectionProfile.database || prop)
 			const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
 			const db = yield mongodb.MongoClient.connect(connString)

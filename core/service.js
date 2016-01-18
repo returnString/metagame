@@ -52,7 +52,7 @@ class Service
 	
 	*createMongoConnection(connectionName)
 	{
-		const connectionProfile = this.config.mongodb[connectionName]
+		const connectionProfile = this.config.mongodb.connections[connectionName]
 		if (!connectionProfile)
 		{
 			throw new Error('Invalid connection profile: ' + connectionName)
@@ -60,7 +60,9 @@ class Service
 		
 		const database = util.format('%s_%s_%s', this.config.sandbox, utils.detectName(this.platform, 'platform'), connectionProfile.database || connectionName)
 		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
-		return yield mongodb.MongoClient.connect(connString, { db: { w: connectionProfile.writeConcern || 'majority' } })
+		
+		const w = connectionProfile.writeConcern || this.config.mongodb.defaultWriteConcern || 'majority'
+		return yield mongodb.MongoClient.connect(connString, { db: { w } })
 	}
 	
 	*createRedisConnection(connectionName)

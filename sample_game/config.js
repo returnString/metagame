@@ -52,13 +52,16 @@ module.exports = {
 	},
 	// these config sections can be referenced inside services to create mongodb connections
 	mongodb: {
-		state: {
-			host: '127.0.0.1',
-			port: 27017,
-		},
-		telemetry: {
-			host: '127.0.0.1',
-			port: 27017,
+		defaultWriteConcern: 'majority',
+		connections: {
+			state: {
+				host: '127.0.0.1',
+				port: 27017,
+			},
+			telemetry: {
+				host: '127.0.0.1',
+				port: 27017,
+			},
 		},
 	},
 	// these config sections can be referenced inside services to create redis connections
