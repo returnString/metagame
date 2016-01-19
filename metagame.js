@@ -205,7 +205,7 @@ else
 			throw new Error('Must specify a config path')
 		}
 		
-		const config = yield loader.require(configPath)
+		const config = loader.require(configPath)
 		const server = new MetagameServer(config)
 		yield server.init()
 	}).catch(err => { console.error(err.stack) })
