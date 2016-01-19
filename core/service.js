@@ -47,6 +47,8 @@ class Service
 			}
 		}
 		
+		validate.data = requestSchema
+		validate.desc = 'request format'
 		return validate
 	}
 	

@@ -25,3 +25,16 @@ exports.detectName = function(object, basedOn)
 		return lowerCaseCtor
 	}
 }
+
+exports.bindAndCopy = function(func, target)
+{
+	const bound = func.bind(target)
+	for (const prop in func)
+	{
+		if (func.hasOwnProperty(prop))
+		{
+			bound[prop] = func[prop]
+		}
+	}
+	return bound
+}

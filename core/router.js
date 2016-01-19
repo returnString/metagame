@@ -16,6 +16,7 @@ class Router
 		this.errors = new ErrorContainer('router', config)
 		this.errors.register('notFound')
 		this.errors.register('internalError')
+		this.advertisedRoutes = {}
 	}
 	
 	addRoute(path, handler, middleware)
@@ -26,6 +27,21 @@ class Router
 		}
 		
 		this.routes.set(path, { handler, middleware })
+		
+		const advertisedRoute = { }
+		this.advertisedRoutes[path] = advertisedRoute
+		
+		if (middleware)
+		{
+			for (const middlewareFunc of middleware)
+			{
+				if (middlewareFunc.data)
+				{
+					const slot = middlewareFunc.desc || middlewareFunc.name
+					advertisedRoute[slot] = middlewareFunc.data
+				}
+			}
+		}
 	}
 	
 	*dispatch(path, socket, params)
@@ -55,6 +71,11 @@ class Router
 	
 	start()
 	{
+		this.addRoute('/routes', function*(request)
+		{
+			return this.advertisedRoutes
+		}.bind(this))
+		
 		for (const socketServer of this.socketServers)
 		{
 			socketServer.on('connection', socket =>
