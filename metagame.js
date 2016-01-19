@@ -59,14 +59,14 @@ class MetagameServer
 			res.end('upgrade required for metagame websocket server')
 		}
 		
-		this.httpServer = http.createServer(processHttpRequest).listen(this.config.server.port)
+		this.httpServer = http.createServer(processHttpRequest).listen(this.config.server.port, this.config.server.bind)
 		
 		if (this.config.server.tls.enabled)
 		{
 			this.httpsServer = https.createServer({
 				key: yield fs.readFileAsync(this.config.server.tls.key),
 				cert: yield fs.readFileAsync(this.config.server.tls.cert),
-			}, processHttpRequest).listen(this.config.server.tls.port)
+			}, processHttpRequest).listen(this.config.server.tls.port, this.config.server.bind)
 		}
 		
 		const webSocketServer = new WebSocketServer({
@@ -115,7 +115,7 @@ class MetagameServer
 		}
 		
 		router.start()
-		this.log.info('init done')
+		this.log.info({ inscecureAddress: this.insecureAddress, secureAddress: this.secureAddress }, 'init done')
 		if (cluster.isWorker)
 		{
 			process.send('initDone')

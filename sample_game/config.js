@@ -9,6 +9,7 @@ module.exports = {
 	// the tests run in the 'tests' sandbox
 	sandbox: 'default',
 	server: {
+		bind: '0.0.0.0',
 		// port for insecure connections
 		port: 1337,
 		// set this to true if you want to trust x-forwarded-for headers for client IP addresses
