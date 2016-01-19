@@ -38,7 +38,7 @@ class MetagameServer
 	
 	createLogger(name)
 	{
-		const logger = bunyan.createLogger({ name, workerID: utils.getWorkerID(), platform: utils.detectName(this.platform, 'platform') })
+		const logger = bunyan.createLogger({ name, workerID: utils.getWorkerID(), platform: this.platform.name })
 		logger.level(this.config.logging.verbosity)
 		return logger
 	}

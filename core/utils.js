@@ -12,11 +12,7 @@ exports.detectName = function(object, basedOn)
 	const search = basedOn.toLowerCase()
 	const lowerCaseCtor = object.constructor.name.toLowerCase()
 	
-	if (object.name)
-	{
-		return object.name
-	}
-	else if (lowerCaseCtor.endsWith(search))
+	if (lowerCaseCtor.endsWith(search))
 	{
 		return lowerCaseCtor.substring(0, lowerCaseCtor.length - search.length)
 	}

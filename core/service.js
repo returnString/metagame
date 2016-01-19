@@ -9,12 +9,14 @@ const jsonschema = require('jsonschema')
 
 class Service
 {
+	get name() { return utils.detectName(this, 'service') }
+	
 	constructor(options)
 	{
 		this.config = options.config
 		this.platform = options.platform
 		this.userMap = options.userMap
-		this.errors = new ErrorContainer(utils.detectName(this, 'service'), this.config)
+		this.errors = new ErrorContainer(this.name, this.config)
 		this.schemaValidator = new jsonschema.Validator()
 		
 		if (this.serviceErrors)
@@ -60,7 +62,7 @@ class Service
 			throw new Error('Invalid connection profile: ' + connectionName)
 		}
 		
-		const database = util.format('%s_%s_%s', this.config.sandbox, utils.detectName(this.platform, 'platform'), connectionProfile.database || connectionName)
+		const database = util.format('%s_%s_%s', this.config.sandbox, this.platform.name, connectionProfile.database || connectionName)
 		const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
 		
 		const w = connectionProfile.writeConcern || this.config.mongodb.defaultWriteConcern || 'majority'

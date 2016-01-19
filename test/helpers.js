@@ -48,7 +48,7 @@ function* boot()
 		for (const prop in config.mongodb.connections)
 		{
 			const connectionProfile = config.mongodb.connections[prop]
-			const database = util.format('%s_%s_%s', config.sandbox, utils.detectName(currentServer.platform, 'platform'), connectionProfile.database || prop)
+			const database = util.format('%s_%s_%s', config.sandbox, currentServer.platform.name, connectionProfile.database || prop)
 			const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
 			const db = yield mongodb.MongoClient.connect(connString)
 			yield db.dropDatabase()
