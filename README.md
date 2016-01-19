@@ -41,12 +41,24 @@ Officially, the following Node versions are tested on Linux and Windows:
 
 Unofficially, it's primarily developed on OSX, but CI doesn't cover that.
 
-To install metagame into your project:
+## Install from npm
+
 ```
 npm install metagame --save
 ```
+```javascript
+const MetagameServer = require('metagame')
+const config = require('config')
+const co = require('co')
 
-To install from source, test, and run:
+const server = new MetagameServer(config)
+co(function*()
+{
+	yield server.init()
+}).catch(err => console.error(err.stack))
+```
+
+## Install from source 
 ```
 git clone https://github.com/returnString/metagame
 cd metagame

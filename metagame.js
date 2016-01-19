@@ -197,16 +197,16 @@ if (module.parent)
 }
 else
 {
+	const configPath = process.argv[2]
+	if (!configPath)
+	{
+		throw new Error('Must specify a config path')
+	}
+	
+	const config = loader.require(configPath)
+	const server = new MetagameServer(config)
 	co(function*()
 	{
-		const configPath = process.argv[2]
-		if (!configPath)
-		{
-			throw new Error('Must specify a config path')
-		}
-		
-		const config = loader.require(configPath)
-		const server = new MetagameServer(config)
 		yield server.init()
-	}).catch(err => { console.error(err.stack) })
+	}).catch(err => console.error(err.stack))
 }
