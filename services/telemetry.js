@@ -75,11 +75,6 @@ module.exports = function*(loader)
 		
 		*record(req)
 		{
-			if (!Array.isArray(req.params.timelines) || req.params.timelines.length === 0)
-			{
-				return this.errors.messageParsingFailed('timelines')
-			}
-			
 			const update = {}
 			for (const timeline of req.params.timelines)
 			{
