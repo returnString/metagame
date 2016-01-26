@@ -12,6 +12,12 @@ const uuid = require('node-uuid')
 // TODO: rethink this, maybe push these into a separate sub-pool to match amongst themselves
 const northPoleCoords = [ 0, 90 ]
 
+const defaultPool = {
+	querySize: 10,
+	must: [],
+	defaults: {},
+}
+
 module.exports = function*(loader)
 {
 	class MatchmakingService extends loader.Service
@@ -27,6 +33,14 @@ module.exports = function*(loader)
 			for (const poolName in this.poolConfig.pools)
 			{
 				const pool = this.poolConfig.pools[poolName]
+				for (var prop in defaultPool)
+				{
+					if (pool[prop] === undefined)
+					{
+						pool[prop] = defaultPool[prop]
+					}
+				}
+				
 				pool.collection = this.db.collection('mm_pool_' + poolName)
 				yield pool.collection.ensureIndex({ pos: '2dsphere' })
 			}

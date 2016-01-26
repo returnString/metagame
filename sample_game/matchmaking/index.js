@@ -3,7 +3,6 @@
 const matchLevel = { op: 'eq', field: 'level' }
 
 const levelPool = {
-	querySize: 10,
 	defaults: {
 		level: 1,
 	},
@@ -13,9 +12,6 @@ const levelPool = {
 }
 
 const easyPool = {
-	querySize: 10,
-	defaults: {},
-	must: [],
 }
 
 module.exports = {
