@@ -31,21 +31,32 @@ module.exports = function*(loader)
 		
 		getRoutes()
 		{
-			const bucket = { type: 'string' }
+			const bucketSchema = { properties: { bucket: { type: 'string' } }, required: [ 'bucket' ] }
 			const sessionID = { type: 'string' }
-			const timelines = {
-				type: 'array',
-				name: { type: 'string' },
-				object: { type: 'string' },
-				entries: {
-					type: 'array',
+			const sessionSchema = { properties: { sessionID }, required: [ 'sessionID' ] }
+			
+			const timelineSchema = {
+				properties: {
+					sessionID,
+					timelines: {
+						type: 'array',
+						name: { type: 'string' },
+						object: { type: 'string' },
+						entries: {
+							type: 'array',
+						},
+					},
 				},
+				required: [
+					'timelines',
+					'sessionID',
+				],
 			}
 			
 			return [
-				[ 'start', this.start, [ this.authenticated, this.schema({ bucket }) ] ],
-				[ 'record', this.record, [ this.authenticated, this.getCollection, this.schema({ sessionID, timelines }) ] ],
-				[ 'view', this.view, [ this.authenticated, this.getCollection, this.schema({ sessionID }) ] ],
+				[ 'start', this.start, [ this.authenticated, this.schema(bucketSchema) ] ],
+				[ 'record', this.record, [ this.authenticated, this.getCollection, this.schema(timelineSchema) ] ],
+				[ 'view', this.view, [ this.authenticated, this.getCollection, this.schema(sessionSchema) ] ],
 			]
 		}
 		

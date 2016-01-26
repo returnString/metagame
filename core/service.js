@@ -39,10 +39,9 @@ class Service
 	
 	schema(requestSchema)
 	{
-		const fullSchema = { properties: requestSchema }
 		function* validate(request)
 		{
-			const result = this.schemaValidator.validate(request.params, fullSchema)
+			const result = this.schemaValidator.validate(request.params, requestSchema)
 			if (!result.valid)
 			{
 				return this.errors.messageParsingFailed(result)

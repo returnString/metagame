@@ -49,26 +49,51 @@ module.exports = function*(loader)
 			const middleware = [ this.authenticated, this.getCollectionAndConfig ]
 			
 			const collection = { type: 'string' }
-			const instance = { type: 'string' }
-			const modifyChanges = {
-				type: 'array',
-				items: {
-					type: 'object',
-					name: { type: 'string' },
+			const id = { type: 'string' }
+			const collectionSchema = { properties: { collection }, required: [ 'collection' ] }
+			const collectionAndInstanceSchema = { properties: { collection, id }, required: [ 'collection', 'id' ] }
+			
+			const modifySchema = {
+				properties: {
+					collection,
+					id,
+					changes: {
+						type: 'array',
+						items: {
+							type: 'object',
+							name: { type: 'string' },
+							required: [
+								'name',
+							],
+						},
+					},
 				},
+				required: [
+					'collection',
+					'id',
+					'changes',
+				],
 			}
 			
-			const transactionChanges = {
-				name: { type: 'string' },
-				targets: { type: 'object' },
+			const transactionSchema = {
+				properties: {
+					collection,
+					id,
+					name: { type: 'string' },
+					targets: { type: 'object' },				
+				},
+				required: [
+					'name',
+					'targets',
+				],
 			}
 			
 			return [
-				[ 'collection', this.getCollection, [ ...middleware, this.schema({ collection }) ] ],
-				[ 'advertised', this.getAdvertised, [ ...middleware, this.schema({ collection }) ] ],
-				[ 'instance', this.getInstance, [ ...middleware, this.schema({ collection, instance }) ] ],
-				[ 'modify', this.modify, [ ...middleware, this.schema({ collection, instance, changes: modifyChanges }) ] ],
-				[ 'transaction', this.transaction, [ this.authenticated, this.schema({ collection, instance, changes: transactionChanges }) ] ],
+				[ 'collection', this.getCollection, [ ...middleware, this.schema(collectionSchema) ] ],
+				[ 'advertised', this.getAdvertised, [ ...middleware, this.schema(collectionSchema) ] ],
+				[ 'instance', this.getInstance, [ ...middleware, this.schema(collectionAndInstanceSchema) ] ],
+				[ 'modify', this.modify, [ ...middleware, this.schema(modifySchema) ] ],
+				[ 'transaction', this.transaction, [ this.authenticated, this.schema(transactionSchema) ] ],
 			]
 		}
 		

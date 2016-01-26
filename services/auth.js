@@ -11,8 +11,17 @@ module.exports = function*(loader)
 		
 		getRoutes()
 		{
+			const loginSchema = {
+				properties: {
+					client: { type: 'string' }
+				},
+				required: [
+					'client',
+				],
+			}
+			
 			return [
-				[ 'login', this.login, [ this.schema({ client: { type: 'string' } }) ] ],
+				[ 'login', this.login, [ this.schema(loginSchema) ] ],
 				[ 'logout', this.logout, [ this.authenticated ] ],
 			]
 		}
