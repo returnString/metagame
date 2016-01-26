@@ -25,7 +25,7 @@ class UserMap
 		return socket.upgradeReq.connection.remoteAddress
 	}
 	
-	addUser(id, socket, platformData, privileges, client)
+	addUser(id, socket, platformData, privileges, client, coords)
 	{
 		let clients = this.clientsByUserID.get(id)
 		if (!clients)
@@ -37,7 +37,18 @@ class UserMap
 		clients[client] = socket
 		
 		const ip = this.getIP(socket)
-		const geo = this.config.geolocation.enabled ? geoip.lookup(ip) : null
+		
+		let geo = null
+		if (this.config.geolocation.allowOverride && coords)
+		{
+			geo = { ll: coords }
+		}
+		else if (this.config.geolocation.enabled)
+		{
+			geo = geoip.lookup(ip)
+		}
+		
+		socket.geo = geo
 		
 		this.usersBySocket.set(socket, {
 			id,

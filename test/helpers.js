@@ -8,6 +8,14 @@ const mongodb = require('mongodb')
 const util = require('util')
 const co = require('co')
 const utils = require('../core/utils')
+const config = require('../sample_game/config')
+config.server.port = 0
+config.server.tls.port = 0
+config.sandbox = 'tests'
+config.clustering.enabled = false
+config.logging.verbosity = 'error'
+config.mongodb.defaultWriteConcern = 1
+config.geolocation.allowOverride = true
 
 let currentServer
 let initialised = false
@@ -24,20 +32,43 @@ function* createSocket()
 	})
 }
 
+function* createMongoConnection(dbName)
+{
+	const connectionProfile = config.mongodb.connections[dbName]
+	const database = util.format('%s_%s_%s', config.sandbox, currentServer.platform.name, connectionProfile.database || dbName)
+	const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
+	return yield mongodb.MongoClient.connect(connString)
+}
+
+function* clearMongo(dbName)
+{
+	const db = yield createMongoConnection(dbName)
+	yield db.dropDatabase()
+}
+
+function* clearMongoCollections(dbName)
+{
+	const db = yield createMongoConnection(dbName)
+	const collectionQuery = db.listCollections()
+	const collectionNames = yield collectionQuery.toArray()
+	for (const collection of collectionNames)
+	{
+		if (!collection.name.startsWith('system'))
+		{
+			// we specifically want to remove all documents, not delete the collection itself
+			// we need to preserve indices that have already have an ensureIndex call
+			// eg matchmaking's geospatial 'pos' index
+			yield db.collection(collection.name).remove({})
+		}
+	}
+}
+
 function* boot()
 {	
 	if (currentServer)
 	{
 		currentServer.close()
 	}
-	
-	const config = require('../sample_game/config')
-	config.server.port = 0
-	config.server.tls.port = 0
-	config.sandbox = 'tests'
-	config.clustering.enabled = false
-	config.logging.verbosity = 'error'
-	config.mongodb.defaultWriteConcern = 1
 	
 	currentServer = new MetagameServer(config)
 	yield currentServer.init()
@@ -47,11 +78,7 @@ function* boot()
 		initialised = true
 		for (const prop in config.mongodb.connections)
 		{
-			const connectionProfile = config.mongodb.connections[prop]
-			const database = util.format('%s_%s_%s', config.sandbox, currentServer.platform.name, connectionProfile.database || prop)
-			const connString = util.format('mongodb://%s:%d/%s', connectionProfile.host, connectionProfile.port, database)
-			const db = yield mongodb.MongoClient.connect(connString)
-			yield db.dropDatabase()
+			yield clearMongo(prop)
 		}
 	}
 }
@@ -106,10 +133,11 @@ function request(ws, path, params, tests)
 	return promise
 }
 
-function* createAuthedSocket(userID, client)
+function* createAuthedSocket(userID, options)
 {
+	options = options || {}
 	const ws = yield createSocket()
-	yield request(ws, '/auth/login', { userID: userID || 'ruan', client: client || 'game' })
+	yield request(ws, '/auth/login', { userID: userID || 'ruan', client: options.client || 'game', coords: options.coords })
 	return ws
 }
 
@@ -122,6 +150,8 @@ function* createServerSocket()
 
 module.exports = {
 	boot,
+	clearMongo,
+	clearMongoCollections,
 	createSocket,
 	createAuthedSocket,
 	createServerSocket,

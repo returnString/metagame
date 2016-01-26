@@ -33,6 +33,7 @@ module.exports = {
 		'services/state',
 		'services/system',
 		'services/telemetry',
+		'services/matchmaking',
 	],
 	clustering: {
 		// enables multiple worker processes for cpu-bound loads
@@ -50,6 +51,8 @@ module.exports = {
 	},
 	geolocation: {
 		enabled: true,
+		// allows clients to override their geolocated data
+		allowOverride: false,
 	},
 	// these config sections can be referenced inside services to create mongodb connections
 	mongodb: {
@@ -60,6 +63,10 @@ module.exports = {
 				port: 27017,
 			},
 			telemetry: {
+				host: '127.0.0.1',
+				port: 27017,
+			},
+			matchmaking: {
 				host: '127.0.0.1',
 				port: 27017,
 			},
@@ -75,5 +82,9 @@ module.exports = {
 		maxRetries: 5,
 		// the duration, in seconds, after which a transaction instance lock is considered to be expired
 		lockTimeout: 10,
+	},
+	matchmaking: {
+		// the module from which the matchmaking service loads the available pools
+		data: 'sample_game/matchmaking',
 	},
 }
