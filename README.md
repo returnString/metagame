@@ -6,6 +6,7 @@ Extensible online game backend. Moderately modern with ES6. Highly WIP.
 metagame will take care of your...
 - user profiles and inventories
 - in-game shop
+- matchmaking
 - custom platform integration
 - annoying in-house PHP 'backend' from three projects ago
 
