@@ -120,7 +120,7 @@ module.exports = function*(loader)
 					{
 						mongoQuery['sessionValues.' + rule.field] = sessionValues[rule.field]
 					}
-					break;
+					break
 				}
 			}
 			
