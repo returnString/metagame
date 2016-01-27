@@ -40,10 +40,12 @@ module.exports = function*(loader)
 					sessionID,
 					timelines: {
 						type: 'array',
-						name: { type: 'string' },
-						object: { type: 'string' },
-						entries: {
-							type: 'array',
+						items: {
+							name: { type: 'string' },
+							object: { type: 'string' },
+							entries: {
+								type: 'array',
+							},
 						},
 					},
 				},
