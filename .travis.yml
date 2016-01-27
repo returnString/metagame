@@ -16,6 +16,8 @@ addons:
     sources:
       - llvm-toolchain-precise-3.6
       - ubuntu-toolchain-r-test
+      - mongodb-3.0-precise
     packages:
       - clang-3.6
       - g++-4.8
+      - mongodb-org-server
