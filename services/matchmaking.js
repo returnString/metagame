@@ -58,7 +58,7 @@ module.exports = function*(loader)
 					throw new Error(poolResult.errors)
 				}
 				
-				pool.collection = this.db.collection('mm_pool_' + poolName)
+				pool.collection = this.db.collection(poolName)
 				yield pool.collection.ensureIndex({ pos: '2dsphere' })
 				yield pool.collection.ensureIndex({ lastUpdatedAt: 1 }, { expireAfterSeconds: this.config.matchmaking.sessionTTL * 60 })
 			}
