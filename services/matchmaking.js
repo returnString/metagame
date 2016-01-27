@@ -1,12 +1,12 @@
 'use strict'
 
 /* TODO:
-	Actual session member lists
-	Max sessions sizes, per-pool
-	Mapping to one 1st-party platform session ID as required 
+	Mapping to one 1st-party platform session ID as required
+	Party member support
 */
 
 const uuid = require('node-uuid')
+const jsonschema = require('jsonschema')
 
 // if we can't resolve an IP, dump it at the north pole to match with other people we can't classify
 // TODO: rethink this, maybe push these into a separate sub-pool to match amongst themselves
@@ -16,6 +16,15 @@ const defaultPool = {
 	querySize: 10,
 	must: [],
 	defaults: {},
+}
+
+const poolSchema = {
+	properties: {
+		maxSpaces: { type: 'int' },
+	},
+	required: [
+		'maxSpaces',
+	],
 }
 
 module.exports = function*(loader)
@@ -30,6 +39,8 @@ module.exports = function*(loader)
 		{
 			this.db = yield this.createMongoConnection('matchmaking')
 			this.poolConfig = loader.require(this.config.matchmaking.data)
+			
+			const poolValidator = new jsonschema.Validator()
 			for (const poolName in this.poolConfig.pools)
 			{
 				const pool = this.poolConfig.pools[poolName]
@@ -39,6 +50,12 @@ module.exports = function*(loader)
 					{
 						pool[prop] = defaultPool[prop]
 					}
+				}
+				
+				const poolResult = poolValidator.validate(pool, poolSchema)
+				if (!poolResult.valid)
+				{
+					throw new Error(poolResult.errors)
 				}
 				
 				pool.collection = this.db.collection('mm_pool_' + poolName)
@@ -80,7 +97,14 @@ module.exports = function*(loader)
 				sessionValues[paramName] = req.params.sessionValues[paramName] || pool.defaults[paramName]
 			}
 			
-			const mongoQuery = {}
+			// TODO: Support for party members
+			const partySize = 1
+			
+			const freeSpaces = { $gte: partySize }
+			const mongoQuery = {
+				freeSpaces,
+			}
+			
 			for (const rule of pool.must)
 			{
 				switch (rule.op)
@@ -107,13 +131,15 @@ module.exports = function*(loader)
 					query: mongoQuery,
 				})
 				
-				const nearSessions = geoResults.results
-				
-				for (const session of nearSessions)
+				for (const sessionEntry of geoResults.results)
 				{
-					joinedSession = session.obj
-					break
-					// TODO: Actually join the session here, attempt a write with a predicate on remaining max space
+					const session = sessionEntry.obj
+					const sessionWrite = yield pool.collection.updateOne({ _id: session._id, freeSpaces }, { $inc: { freeSpaces: -partySize }})
+					if (sessionWrite.result.ok)
+					{
+						joinedSession = session
+						break
+					}
 				}
 			}
 			
@@ -124,7 +150,12 @@ module.exports = function*(loader)
 			else
 			{
 				const newSessionID = uuid.v4()
-				joinedSession = { _id: newSessionID, pos: sessionPoint, sessionValues }
+				joinedSession = {
+					_id: newSessionID,
+					pos: sessionPoint,
+					sessionValues,
+					freeSpaces: pool.maxSpaces - partySize,
+				}
 				yield pool.collection.insert(joinedSession)
 				return { action: 'create', sessionID: newSessionID }
 			}
