@@ -14,6 +14,7 @@ describe('matchmaking', function()
 	})
 	
 	let rollingUserID = 0
+	let rollingPartyID = 0
 	function* createSocket(coords)
 	{
 		return yield helpers.createAuthedSocket(++rollingUserID, { coords })
@@ -21,7 +22,7 @@ describe('matchmaking', function()
 	
 	function* search(ws, pool, sessionValues, forceCreate)
 	{
-		return yield helpers.request(ws, '/matchmaking/search', { pool, sessionValues: sessionValues || {}, forceCreate, members: [] })
+		return yield helpers.request(ws, '/matchmaking/search', { pool, sessionValues: sessionValues || {}, forceCreate, members: [], partyID: 'party_' + ++rollingPartyID })
 	}
 	
 	function* expectCreate(ws, pool, sessionValues)

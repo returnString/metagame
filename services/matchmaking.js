@@ -2,7 +2,6 @@
 
 /* TODO:
 	Mapping to one 1st-party platform session ID as required
-	Party member support
 */
 
 const uuid = require('node-uuid')
@@ -61,7 +60,7 @@ module.exports = function*(loader)
 				pool.collection = this.db.collection(poolName)
 				yield pool.collection.ensureIndex({ pos: '2dsphere' })
 				yield pool.collection.ensureIndex({ lastUpdatedAt: 1 }, { expireAfterSeconds: this.config.matchmaking.sessionTTL * 60 })
-			}
+			}			
 		}
 		
 		getRoutes()
@@ -70,16 +69,18 @@ module.exports = function*(loader)
 				properties: {
 					pool: { type: 'string' },
 					sessionValues: { type: 'object' },
-					forceCreate: { type: 'boolean' },
 					members: {
 						type: 'array',
-						item: { type: 'string' },
+						items: { type: [ 'number', 'string' ] },
 					},
+					partyID: { type: 'string' },
+					forceCreate: { type: 'boolean' },
 				},
 				required: [
 					'pool',
 					'sessionValues',
 					'members',
+					'partyID',
 				],
 			}
 			
@@ -106,6 +107,7 @@ module.exports = function*(loader)
 			const members = req.params.members
 			members.push(req.user.id)
 			const partySize = members.length
+			const partyID = req.params.partyID
 			
 			const freeSpaces = { $gte: partySize }
 			const mongoQuery = {
@@ -144,7 +146,7 @@ module.exports = function*(loader)
 					const sessionWrite = yield pool.collection.updateOne({ _id: session._id, freeSpaces },
 					{
 						$inc: { freeSpaces: -partySize },
-						$push: { members: { $each: members } },
+						$set: { ['parties.' + partyID]: members },
 						$currentDate: { lastUpdatedAt: true },
 					})
 					
@@ -156,24 +158,28 @@ module.exports = function*(loader)
 				}
 			}
 			
+			let result, sessionID
 			if (joinedSession)
 			{
-				return { action: 'join', sessionID: joinedSession._id }
+				sessionID = joinedSession._id
+				result = { action: 'join', sessionID }
 			}
 			else
 			{
-				const newSessionID = uuid.v4()
+				sessionID = uuid.v4()
 				joinedSession = {
-					_id: newSessionID,
+					_id: sessionID,
 					pos: sessionPoint,
 					sessionValues,
 					freeSpaces: pool.maxSpaces - partySize,
-					members,
+					parties: { [partyID]: members },
 					lastUpdatedAt: new Date(),
 				}
 				yield pool.collection.insert(joinedSession)
-				return { action: 'create', sessionID: newSessionID }
+				result = { action: 'create', sessionID }
 			}
+			
+			return result
 		}
 	}
 	
