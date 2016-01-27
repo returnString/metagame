@@ -70,10 +70,15 @@ module.exports = function*(loader)
 					pool: { type: 'string' },
 					sessionValues: { type: 'object' },
 					forceCreate: { type: 'boolean' },
+					members: {
+						type: 'array',
+						item: { type: 'string' },
+					},
 				},
 				required: [
 					'pool',
 					'sessionValues',
+					'members',
 				],
 			}
 			
@@ -97,8 +102,9 @@ module.exports = function*(loader)
 				sessionValues[paramName] = req.params.sessionValues[paramName] || pool.defaults[paramName]
 			}
 			
-			// TODO: Support for party members
-			const partySize = 1
+			const members = req.params.members
+			members.push(req.user.id)
+			const partySize = members.length
 			
 			const freeSpaces = { $gte: partySize }
 			const mongoQuery = {
@@ -134,7 +140,11 @@ module.exports = function*(loader)
 				for (const sessionEntry of geoResults.results)
 				{
 					const session = sessionEntry.obj
-					const sessionWrite = yield pool.collection.updateOne({ _id: session._id, freeSpaces }, { $inc: { freeSpaces: -partySize }})
+					const sessionWrite = yield pool.collection.updateOne({ _id: session._id, freeSpaces },
+					{
+						$inc: { freeSpaces: -partySize },
+						$push: { members: { $each: members } },
+					})
 					if (sessionWrite.result.ok)
 					{
 						joinedSession = session
@@ -155,6 +165,7 @@ module.exports = function*(loader)
 					pos: sessionPoint,
 					sessionValues,
 					freeSpaces: pool.maxSpaces - partySize,
+					members,
 				}
 				yield pool.collection.insert(joinedSession)
 				return { action: 'create', sessionID: newSessionID }

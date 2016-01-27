@@ -21,7 +21,7 @@ describe('matchmaking', function()
 	
 	function* search(ws, pool, sessionValues, forceCreate)
 	{
-		return yield helpers.request(ws, '/matchmaking/search', { pool, sessionValues: sessionValues || {}, forceCreate })
+		return yield helpers.request(ws, '/matchmaking/search', { pool, sessionValues: sessionValues || {}, forceCreate, members: [] })
 	}
 	
 	function* expectCreate(ws, pool, sessionValues)
