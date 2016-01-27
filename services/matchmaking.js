@@ -60,6 +60,7 @@ module.exports = function*(loader)
 				
 				pool.collection = this.db.collection('mm_pool_' + poolName)
 				yield pool.collection.ensureIndex({ pos: '2dsphere' })
+				yield pool.collection.ensureIndex({ lastUpdatedAt: 1 }, { expireAfterSeconds: this.config.matchmaking.sessionTTL * 60 })
 			}
 		}
 		
@@ -144,7 +145,9 @@ module.exports = function*(loader)
 					{
 						$inc: { freeSpaces: -partySize },
 						$push: { members: { $each: members } },
+						$currentDate: { lastUpdatedAt: true },
 					})
+					
 					if (sessionWrite.result.ok)
 					{
 						joinedSession = session
@@ -166,6 +169,7 @@ module.exports = function*(loader)
 					sessionValues,
 					freeSpaces: pool.maxSpaces - partySize,
 					members,
+					lastUpdatedAt: new Date(),
 				}
 				yield pool.collection.insert(joinedSession)
 				return { action: 'create', sessionID: newSessionID }
