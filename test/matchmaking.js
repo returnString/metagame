@@ -20,30 +20,34 @@ describe('matchmaking', function()
 		return yield helpers.createAuthedSocket(++rollingUserID, { coords })
 	}
 	
-	function* search(ws, pool, sessionValues, forceCreate)
+	function* search(ws, pool, sessionValues, forceCreate, partyID)
 	{
-		return yield helpers.request(ws, '/matchmaking/search', { pool, sessionValues: sessionValues || {}, forceCreate, members: [], partyID: 'party_' + ++rollingPartyID })
+		if (!partyID) partyID = 'party_' + ++rollingPartyID
+		return yield helpers.request(ws, '/matchmaking/search', { pool, sessionValues: sessionValues || {}, forceCreate, members: [], partyID })
 	}
 	
-	function* expectCreate(ws, pool, sessionValues)
+	function* expectCreate(ws, pool, sessionValues, partyID)
 	{
-		const searchResult = yield search(ws, pool, sessionValues)
+		const searchResult = yield search(ws, pool, sessionValues, false, partyID)
 		assert.equal(searchResult.data.action, 'create')
 		return searchResult.data.sessionID
 	}
 	
-	function* forceCreate(ws, pool, sessionValues)
+	function* forceCreate(ws, pool, sessionValues, partyID)
 	{
-		const searchResult = yield search(ws, pool, sessionValues, true)
+		const searchResult = yield search(ws, pool, sessionValues, true, partyID)
 		assert.equal(searchResult.data.action, 'create')
 		return searchResult.data.sessionID
 	}
 	
-	function* expectJoin(ws, pool, sessionValues, sessionID)
+	function* expectJoin(ws, pool, sessionValues, sessionID, partyID)
 	{
-		const searchResult = yield search(ws, pool, sessionValues)
+		const searchResult = yield search(ws, pool, sessionValues, false, partyID)
 		assert.equal(searchResult.data.action, 'join')
-		assert.equal(searchResult.data.sessionID, sessionID)
+		if (sessionID)
+		{
+			assert.equal(searchResult.data.sessionID, sessionID)
+		}
 	}
 	
 	it('should match searching users according to a "must" rule', function*()
@@ -85,5 +89,13 @@ describe('matchmaking', function()
 		yield expectJoin(ws3, 'easyPool', {}, id)
 		yield expectJoin(ws4, 'easyPool', {}, id)
 		yield expectCreate(ws5, 'easyPool')
+	})
+	
+	it('should prevent a party rejoining the same session before leaving', function*()
+	{
+		const ws = yield createSocket()
+		const partyID = 'rejoining_party'
+		yield expectCreate(ws, 'easyPool', {}, partyID)
+		yield expectCreate(ws, 'easyPool', {}, partyID)
 	})
 })

@@ -60,6 +60,8 @@ module.exports = function*(loader)
 				pool.collection = this.db.collection(poolName)
 				yield pool.collection.ensureIndex({ pos: '2dsphere' })
 				yield pool.collection.ensureIndex({ lastUpdatedAt: 1 }, { expireAfterSeconds: this.config.matchmaking.sessionTTL * 60 })
+			
+				pool.partyCollection = this.db.collection(`${poolName}_parties`)
 			}			
 		}
 		
@@ -112,6 +114,7 @@ module.exports = function*(loader)
 			const freeSpaces = { $gte: partySize }
 			const mongoQuery = {
 				freeSpaces,
+				['parties.' + partyID]: { $exists: false }, 
 			}
 			
 			for (const rule of pool.must)
@@ -179,6 +182,13 @@ module.exports = function*(loader)
 				result = { action: 'create', sessionID }
 			}
 			
+			const partyTrackerResult = yield pool.partyCollection.findAndModify({ _id: partyID }, [], { sessionID, partySize }, { upsert: true })
+			const formerSession = partyTrackerResult.value
+			if (formerSession)
+			{
+				yield pool.collection.update({ _id: formerSession.sessionID }, { $unset: { ['parties.' + partyID]: 1 }, $inc: { freeSpaces: formerSession.partySize } })
+			}
+				
 			return result
 		}
 	}
