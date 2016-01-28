@@ -32,6 +32,7 @@ module.exports = function*(loader)
 	{
 		get serviceErrors() { return [
 			'poolNotFound',
+			'sessionInaccessible',
 		]}
 		
 		*init()
@@ -67,15 +68,19 @@ module.exports = function*(loader)
 		
 		getRoutes()
 		{
+			const pool = { type: 'string' }
+			const partyID = { type: 'string' }
+			const sessionID = { type: 'string' }
+			
 			const searchSchema = {
 				properties: {
-					pool: { type: 'string' },
+					pool,
 					sessionValues: { type: 'object' },
 					members: {
 						type: 'array',
 						items: { type: [ 'number', 'string' ] },
 					},
-					partyID: { type: 'string' },
+					partyID,
 					forceCreate: { type: 'boolean' },
 				},
 				required: [
@@ -86,9 +91,53 @@ module.exports = function*(loader)
 				],
 			}
 			
+			const pingSchema = {
+				properties: {
+					pool,
+					partyID,
+					sessionID,
+				},
+				required: [
+					'pool',
+					'partyID',
+					'sessionID',
+				],
+			}
+			
 			return [
 				[ 'search', this.search, [ this.authenticated, this.schema(searchSchema) ] ],
+				[ 'ping', this.ping, [ this.authenticated, this.schema(pingSchema) ] ],
 			]
+		}
+		
+		*ping(req)
+		{
+			const poolName = req.params.pool
+			const pool = this.poolConfig.pools[poolName]
+			if (!pool)
+			{
+				return this.errors.poolNotFound(poolName)
+			}
+			
+			const partyID = req.params.partyID
+			const sessionID = req.params.sessionID
+			
+			const pingWrite = yield pool.collection.updateOne({
+				_id: sessionID,
+				['parties.' + partyID]: { $exists: true },
+			},
+			{
+				$currentDate: { lastUpdatedAt: true },
+			})
+			
+			if (pingWrite.result.n)
+			{
+				return { ok: true }
+			}
+			else
+			{
+				return this.errors.sessionInaccessible()
+			}
 		}
 		
 		*search(req)

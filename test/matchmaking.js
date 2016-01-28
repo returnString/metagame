@@ -98,4 +98,22 @@ describe('matchmaking', function()
 		yield expectCreate(ws, 'easyPool', {}, partyID)
 		yield expectCreate(ws, 'easyPool', {}, partyID)
 	})
+	
+	it('should allow a party to ping a session', function*()
+	{
+		const ws = yield createSocket()
+		const partyID = 'pinging_party'
+		const pool = 'easyPool'
+		const sessionID = yield expectCreate(ws, pool, {}, partyID)
+		yield helpers.request(ws, '/matchmaking/ping', { pool, sessionID, partyID })
+	})
+	
+	it('should prevent a party from pinging an unowned session', function*()
+	{
+		const ws = yield createSocket()
+		const partyID = 'pinging_party'
+		const pool = 'easyPool'
+		yield expectCreate(ws, pool, {}, partyID)
+		yield helpers.request(ws, '/matchmaking/ping', { pool, sessionID: 'nonexistent_sessionID', partyID }, helpers.assertError('matchmaking/sessionInaccessible'))
+	})
 })
