@@ -6,7 +6,6 @@ class TestUser
 {
 	constructor()
 	{
-		this.name = ''
 		this.currency = 0
 		this.items = []
 	}
