@@ -82,6 +82,10 @@ module.exports = function*(loader)
 					},
 					partyID,
 					forceCreate: { type: 'boolean' },
+					excludedSessions: {
+						type: 'array',
+						items: { type: 'string' },
+					},
 				},
 				required: [
 					'pool',
@@ -164,6 +168,11 @@ module.exports = function*(loader)
 			const mongoQuery = {
 				freeSpaces,
 				['parties.' + partyID]: { $exists: false }, 
+			}
+			
+			if (req.params.excludedSessions)
+			{
+				mongoQuery._id = { $nin: req.params.excludedSessions }
 			}
 			
 			for (const rule of pool.must)
