@@ -87,6 +87,6 @@ module.exports = {
 		// the module from which the matchmaking service loads the available pools
 		data: 'sample_game/matchmaking',
 		// the duration, in minutes, after which matchmaking sessions expire if not updated
-		sessionTTL: 5,
+		sessionTTL: 0.5,
 	},
 }

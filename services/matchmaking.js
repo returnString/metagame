@@ -281,7 +281,8 @@ module.exports = function*(loader)
 			{
 				yield pool.collection.update({ _id: formerSession.sessionID }, { $unset: { ['parties.' + partyID]: 1 }, $inc: { freeSpaces: formerSession.partySize } })
 			}
-				
+			
+			result.ttl = this.config.matchmaking.sessionTTL * 60
 			return result
 		}
 	}
