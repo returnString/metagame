@@ -214,7 +214,7 @@ module.exports = function*(loader)
 			if (joinedSession)
 			{
 				sessionID = joinedSession._id
-				result = { action: 'join', sessionID }
+				result = { action: 'join', sessionID, hostPartyID: joinedSession.hostPartyID }
 			}
 			else
 			{
@@ -226,6 +226,7 @@ module.exports = function*(loader)
 					freeSpaces: pool.maxSpaces - partySize,
 					parties: { [partyID]: members },
 					lastUpdatedAt: new Date(),
+					hostPartyID: partyID,
 				}
 				yield pool.collection.insert(joinedSession)
 				result = { action: 'create', sessionID }
