@@ -59,6 +59,17 @@ const grantCurrency = {
 	},
 }
 
+const grantCurrencyInsecure = {
+	*apply(testUser, params)
+	{
+		testUser.currency += params.currency
+	},
+	*test(user, id)
+	{
+		return user.id == id
+	},
+}
+
 const setCurrency = {
 	*apply(testUser, params)
 	{
@@ -71,6 +82,7 @@ module.exports = {
 	changes: {
 		buyItem,
 		grantCurrency,
+		grantCurrencyInsecure,
 		setCurrency,
 	},
 	advertised: {
