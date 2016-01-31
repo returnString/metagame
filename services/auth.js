@@ -34,8 +34,8 @@ module.exports = function*(loader)
 				return this.errors.invalidParam('client')
 			}
 			
-			this.userMap.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client, req.params.coords)
-			return { ok: true }
+			const userData = this.userMap.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client, req.params.coords)
+			return { ok: true, ip: userData.ip }
 		}
 		
 		*logout(req)

@@ -50,7 +50,7 @@ class UserMap
 		
 		socket.geo = geo
 		
-		this.usersBySocket.set(socket, {
+		const data = {
 			id,
 			socket,
 			platformData,
@@ -58,7 +58,9 @@ class UserMap
 			client,
 			ip,
 			geo,
-		})
+		}
+		this.usersBySocket.set(socket, data)
+		return data
 	}
 	
 	removeUser(socket)
