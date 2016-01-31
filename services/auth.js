@@ -13,7 +13,7 @@ module.exports = function*(loader)
 		{
 			const loginSchema = {
 				properties: {
-					client: { type: 'string' }
+					client: { type: 'string' },
 				},
 				required: [
 					'client',
@@ -35,7 +35,7 @@ module.exports = function*(loader)
 			}
 			
 			const userData = this.userMap.addUser(authData.id, req.socket, authData.platformData, authData.privileges, req.params.client, req.params.coords)
-			return { ok: true, ip: userData.ip }
+			return { ok: true, ip: userData.ip, id: authData.id }
 		}
 		
 		*logout(req)
