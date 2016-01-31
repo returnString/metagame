@@ -95,7 +95,7 @@ module.exports = function*(loader)
 				],
 			}
 			
-			const pingSchema = {
+			const updateSchema = {
 				properties: {
 					pool,
 					partyID,
@@ -110,10 +110,11 @@ module.exports = function*(loader)
 			
 			return [
 				[ 'search', this.search, [ this.authenticated, this.schema(searchSchema) ] ],
-				[ 'ping', this.ping, [ this.authenticated, this.schema(pingSchema) ] ],
+				[ 'ping', this.ping, [ this.authenticated, this.schema(updateSchema) ] ],
+				[ 'leave', this.leave, [ this.authenticated, this.schema(updateSchema) ] ],
 			]
 		}
-		
+
 		*ping(req)
 		{
 			const poolName = req.params.pool
@@ -135,6 +136,39 @@ module.exports = function*(loader)
 			})
 			
 			if (pingWrite.result.n)
+			{
+				return { ok: true }
+			}
+			else
+			{
+				return this.errors.sessionInaccessible()
+			}
+		}
+		
+		*leave(req)
+		{
+			const poolName = req.params.pool
+			const pool = this.poolConfig.pools[poolName]
+			if (!pool)
+			{
+				return this.errors.poolNotFound(poolName)
+			}
+			
+			const partyID = req.params.partyID
+			const sessionID = req.params.sessionID
+			const partyField = 'parties.' + partyID
+			
+			const partyTrackerEntry = yield pool.partyCollection.findOne({ _id: partyID })
+			const leaveWrite = yield pool.collection.updateOne({
+				_id: sessionID,
+				[partyField]: { $exists: true },
+			},
+			{
+				$inc: { freeSpaces: partyTrackerEntry.partySize },
+				$unset: { [partyField]: true },
+			})
+			
+			if (leaveWrite.result.n)
 			{
 				return { ok: true }
 			}
