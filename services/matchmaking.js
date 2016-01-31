@@ -160,7 +160,7 @@ module.exports = function*(loader)
 			const partySize = members.length
 			const partyID = req.params.partyID
 			
-			const freeSpaces = { $gte: partySize }
+			const freeSpaces = { $gte: partySize, $lt: pool.maxSpaces }
 			const mongoQuery = {
 				freeSpaces,
 				['parties.' + partyID]: { $exists: false }, 
