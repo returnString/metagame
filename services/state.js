@@ -109,13 +109,13 @@ module.exports = function*(loader)
 		
 		*getInstance(req)
 		{
-			const result = yield req.collection.findOne({ _id: req.params.id })
-			if (!result)
+			const instance = yield req.collection.findOne({ _id: req.params.id })
+			if (!instance)
 			{
 				return this.errors.instanceNotFound()
 			}
 			
-			return result
+			return { instance }
 		}
 		
 		*modify(req)

@@ -87,7 +87,7 @@ describe('state', function()
 		it('should persist changes across connections', function*()
 		{
 			const ws = yield helpers.createAuthedSocket()
-			yield helpers.request(ws, '/state/instance', { collection: 'users', id: 'ruan' }, res => assert.strictEqual(res.data.currency, 200))
+			yield helpers.request(ws, '/state/instance', { collection: 'users', id: 'ruan' }, res => assert.strictEqual(res.data.instance.currency, 200))
 		})
 		
 		it('should return an error for an instance that does not exist', function*()
