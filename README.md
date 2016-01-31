@@ -13,6 +13,9 @@ metagame will take care of your...
 It uses websockets and JSON, and so should be easily usable from most languages.
 It also includes SSL support if you don't feel like setting up SSL termination.
 
+# Clients
+- [Unity](https://github.com/returnString/metagame.unity)
+
 # Documentation
 ## Protocol
 -	[Requests and responses](https://github.com/returnString/metagame/wiki/Protocol)
