@@ -85,11 +85,13 @@ class MetagameServer
 		}
 
 		const router = new Router(this.createLogger('router'), socketServers, this.config)
+		const coreModules = this.config.services.core.map(s => require('./services/' + s))
+		const customModules = this.config.services.custom.map(s => loader.require(s))
+		const allModules = [ ...coreModules, ...customModules ]
 		
-		for (const serviceFile of this.config.services)
+		for (const serviceModule of allModules)
 		{
-			const serviceClassCreator = loader.require(serviceFile)
-			const ServiceClass = yield serviceClassCreator(loader)
+			const ServiceClass = yield serviceModule(loader)
 			const service = new ServiceClass({
 				platform: this.platform,
 				userMap: this.userMap,

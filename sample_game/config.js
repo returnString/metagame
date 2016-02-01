@@ -26,15 +26,21 @@ module.exports = {
 			key: 'sample_game/keys/metagame_key.pem',
 		},
 	},
-	// all these service modules will be loaded on startup
-	// you can specify relative or absolute paths
-	services: [
-		'services/auth',
-		'services/state',
-		'services/system',
-		'services/telemetry',
-		'services/matchmaking',
-	],
+	
+	services: {
+		// core services to load
+		core: [
+			'auth',
+			'state',
+			'system',
+			'telemetry',
+			'matchmaking',
+		],
+		// all these service modules will be loaded on startup
+		// you can specify relative or absolute paths
+		custom: [
+		],
+	},
 	clustering: {
 		// enables multiple worker processes for cpu-bound loads
 		enabled: true,
