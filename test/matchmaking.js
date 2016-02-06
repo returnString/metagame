@@ -20,9 +20,12 @@ describe('matchmaking', function()
 		return yield helpers.createAuthedSocket(++rollingUserID, { coords })
 	}
 	
+	const auto = Symbol()
+	
 	function* search(ws, pool, sessionValues, forceCreate, partyID)
 	{
 		if (!partyID) partyID = 'party_' + ++rollingPartyID
+		if (ws === auto) ws = yield createSocket()
 		return yield helpers.request(ws, '/matchmaking/search', { pool, sessionValues: sessionValues || {}, forceCreate, members: [], partyID })
 	}
 	
@@ -52,15 +55,10 @@ describe('matchmaking', function()
 	
 	it('should match searching users according to a "must" rule', function*()
 	{
-		const ws1 = yield createSocket()
-		const ws2 = yield createSocket()
-		const ws3 = yield createSocket()
-		const ws4 = yield createSocket()
-		
-		const lv1ID = yield expectCreate(ws1, 'levelPool', { level: 1 })
-		const lv2ID = yield expectCreate(ws2, 'levelPool', { level: 2 })
-		yield expectJoin(ws3, 'levelPool', { level: 1 }, lv1ID)
-		yield expectJoin(ws4, 'levelPool', { level: 2 }, lv2ID)
+		const lv1ID = yield expectCreate(auto, 'levelPool', { level: 1 })
+		const lv2ID = yield expectCreate(auto, 'levelPool', { level: 2 })
+		yield expectJoin(auto, 'levelPool', { level: 1 }, lv1ID)
+		yield expectJoin(auto, 'levelPool', { level: 2 }, lv2ID)
 	})
 	
 	it('should prioritise nearby sessions if all else is equal', function*()
@@ -78,17 +76,11 @@ describe('matchmaking', function()
 	
 	it('should respect max space settings per pool', function*()
 	{
-		const ws1 = yield createSocket()
-		const ws2 = yield createSocket()
-		const ws3 = yield createSocket()
-		const ws4 = yield createSocket()
-		const ws5 = yield createSocket()
-		
-		const id = yield expectCreate(ws1, 'easyPool')
-		yield expectJoin(ws2, 'easyPool', {}, id)
-		yield expectJoin(ws3, 'easyPool', {}, id)
-		yield expectJoin(ws4, 'easyPool', {}, id)
-		yield expectCreate(ws5, 'easyPool')
+		const id = yield expectCreate(auto, 'easyPool')
+		yield expectJoin(auto, 'easyPool', {}, id)
+		yield expectJoin(auto, 'easyPool', {}, id)
+		yield expectJoin(auto, 'easyPool', {}, id)
+		yield expectCreate(auto, 'easyPool')
 	})
 	
 	it('should prevent a party rejoining the same session before leaving', function*()
