@@ -4,7 +4,7 @@
 	Mapping to one 1st-party platform session ID as required
 */
 
-const uuid = require('node-uuid')
+const uuid = require('uuid')
 const jsonschema = require('jsonschema')
 
 // if we can't resolve an IP, dump it at the north pole to match with other people we can't classify
