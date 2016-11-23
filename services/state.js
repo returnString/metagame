@@ -1,7 +1,7 @@
 'use strict'
 
 const os = require('os')
-const uuid = require('node-uuid')
+const uuid = require('uuid')
 
 module.exports = function*(loader)
 {
